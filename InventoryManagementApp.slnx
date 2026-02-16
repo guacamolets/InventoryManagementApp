@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="inventorymanagementapp.client/inventorymanagementapp.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="InventoryManagementApp.Server/InventoryManagementApp.Server.csproj" />
+</Solution>
