@@ -5,38 +5,64 @@ namespace InventoryManagementApp.Server.Services;
 
 public class InventoryService
 {
-    private readonly AppDbContext _db;
+    private readonly AppDbContext _context;
 
-    public InventoryService(AppDbContext db)
+    public InventoryService(AppDbContext context)
     {
-        _db = db;
+        _context = context;
     }
 
-    public async Task<List<Inventory>> GetAllAsync() =>
-        await _db.Inventories.Include(i => i.Items).ToListAsync();
-
-    public async Task<Inventory> GetByIdAsync(Guid id) =>
-        await _db.Inventories.Include(i => i.Items).FirstOrDefaultAsync(i => i.Id == id);
-
-    public async Task CreateAsync(Inventory inventory)
+    public async Task<IEnumerable<Inventory>> GetAllAsync()
     {
-        _db.Inventories.Add(inventory);
-        await _db.SaveChangesAsync();
+        return await _context.Inventories.AsNoTracking().ToListAsync();
     }
 
-    public async Task UpdateAsync(Inventory inventory)
+    public async Task<Inventory?> GetByIdAsync(Guid id)
     {
-        _db.Inventories.Update(inventory);
-        await _db.SaveChangesAsync();
+        return await _context.Inventories.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
     }
 
-    public async Task DeleteAsync(Guid id)
+    public async Task<Inventory> CreateAsync(Inventory inventory, string userId)
     {
-        var inv = await _db.Inventories.FindAsync(id);
-        if (inv != null)
-        {
-            _db.Inventories.Remove(inv);
-            await _db.SaveChangesAsync();
-        }
+        inventory.Id = Guid.NewGuid();
+        inventory.OwnerId = userId;
+
+        _context.Inventories.Add(inventory);
+        await _context.SaveChangesAsync();
+
+        return inventory;
+    }
+
+    public async Task<bool> UpdateAsync(Guid id, Inventory updated, string userId, bool isAdmin)
+    {
+        var inventory = await _context.Inventories.FirstOrDefaultAsync(i => i.Id == id);
+
+        if (inventory == null)
+            return false;
+
+        if (inventory.OwnerId != userId && !isAdmin)
+            return false;
+
+        inventory.Title = updated.Title;
+        inventory.Description = updated.Description;
+        inventory.Category = updated.Category;
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(Guid id, string userId, bool isAdmin)
+    {
+        var inventory = await _context.Inventories.FirstOrDefaultAsync(i => i.Id == id);
+
+        if (inventory == null)
+            return false;
+
+        if (inventory.OwnerId != userId && !isAdmin)
+            return false;
+
+        _context.Inventories.Remove(inventory);
+        await _context.SaveChangesAsync();
+        return true;
     }
 }

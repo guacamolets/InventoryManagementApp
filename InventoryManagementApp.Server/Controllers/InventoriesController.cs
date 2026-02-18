@@ -18,33 +18,61 @@ public class InventoriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll() => Ok(await _service.GetAllAsync());
+    public async Task<IActionResult> GetAll()
+    {
+        var inventories = await _service.GetAllAsync();
+        return Ok(inventories);
+    }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(Guid id) => Ok(await _service.GetByIdAsync(id));
+    public async Task<IActionResult> Get(Guid id)
+    {
+        var inventory = await _service.GetByIdAsync(id);
+
+        if (inventory == null)
+            return NotFound();
+
+        return Ok(inventory);
+    }
 
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Create([FromBody] Inventory inventory)
     {
-        inventory.OwnerId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        await _service.CreateAsync(inventory);
-        return Ok(inventory);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        
+        var created = await _service.CreateAsync(inventory, userId!);
+
+        return CreatedAtAction(nameof(Get), new { id = created.Id }, created);
     }
 
     [HttpPut("{id}")]
     [Authorize]
     public async Task<IActionResult> Update(Guid id, [FromBody] Inventory inventory)
     {
-        await _service.UpdateAsync(inventory);
-        return Ok(inventory);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+
+        var success = await _service.UpdateAsync(id, inventory, userId!, isAdmin);
+
+        if (!success)
+            return Forbid();
+
+        return NoContent();
     }
 
     [HttpDelete("{id}")]
     [Authorize]
     public async Task<IActionResult> Delete(Guid id)
     {
-        await _service.DeleteAsync(id);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+
+        var success = await _service.DeleteAsync(id, userId!, isAdmin);
+
+        if (!success)
+            return Forbid();
+
         return NoContent();
     }
 }
