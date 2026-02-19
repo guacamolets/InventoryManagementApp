@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace InventoryManagementApp.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260216120927_InitialCreate")]
+    [Migration("20260219175202_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -73,6 +73,7 @@ namespace InventoryManagementApp.Server.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
+                        .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
@@ -114,11 +115,14 @@ namespace InventoryManagementApp.Server.Migrations
 
                     b.Property<string>("OwnerId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
+                        .HasColumnName("RowVersion");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -128,7 +132,34 @@ namespace InventoryManagementApp.Server.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
+                    b.HasIndex("OwnerId");
+
                     b.ToTable("Inventories");
+                });
+
+            modelBuilder.Entity("InventoryManagementApp.Server.Entities.InventoryAccess", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("CanWrite")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("InventoryId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InventoryId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("InventoryAccesses");
                 });
 
             modelBuilder.Entity("InventoryManagementApp.Server.Entities.Item", b =>
@@ -145,12 +176,22 @@ namespace InventoryManagementApp.Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("InventoryId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<byte[]>("RowVersion")
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("varbinary(max)");
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion")
+                        .HasColumnName("RowVersion");
 
                     b.HasKey("Id");
 
@@ -300,6 +341,33 @@ namespace InventoryManagementApp.Server.Migrations
                     b.HasOne("InventoryManagementApp.Server.Entities.ApplicationUser", null)
                         .WithMany("OwnedInventories")
                         .HasForeignKey("ApplicationUserId");
+
+                    b.HasOne("InventoryManagementApp.Server.Entities.ApplicationUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("InventoryManagementApp.Server.Entities.InventoryAccess", b =>
+                {
+                    b.HasOne("InventoryManagementApp.Server.Entities.Inventory", "Inventory")
+                        .WithMany()
+                        .HasForeignKey("InventoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("InventoryManagementApp.Server.Entities.ApplicationUser", "User")
+                        .WithMany("InventoryAccesses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Inventory");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("InventoryManagementApp.Server.Entities.Item", b =>
@@ -374,6 +442,8 @@ namespace InventoryManagementApp.Server.Migrations
 
             modelBuilder.Entity("InventoryManagementApp.Server.Entities.ApplicationUser", b =>
                 {
+                    b.Navigation("InventoryAccesses");
+
                     b.Navigation("OwnedInventories");
                 });
 
