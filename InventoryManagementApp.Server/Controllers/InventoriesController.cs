@@ -110,7 +110,7 @@ public class InventoriesController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id}/access")]
     [Authorize]
     public async Task<IActionResult> GetAccessList(Guid id)
     {

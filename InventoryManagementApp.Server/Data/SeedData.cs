@@ -16,11 +16,11 @@ public static class SeedData
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        context.Items.RemoveRange(context.Items);
-        context.InventoryAccesses.RemoveRange(context.InventoryAccesses);
-        context.Inventories.RemoveRange(context.Inventories);
+        //context.Items.RemoveRange(context.Items);
+        //context.InventoryAccesses.RemoveRange(context.InventoryAccesses);
+        //context.Inventories.RemoveRange(context.Inventories);
 
-        await context.SaveChangesAsync();
+        //await context.SaveChangesAsync();
 
         string[] roles = { "Admin", "User" };
         foreach (var role in roles)
