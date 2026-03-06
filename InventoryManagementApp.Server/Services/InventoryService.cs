@@ -1,5 +1,6 @@
 ﻿using InventoryManagementApp.Server.Entities;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace InventoryManagementApp.Server.Services;
 
@@ -12,9 +13,23 @@ public class InventoryService
         _context = context;
     }
 
-    public async Task<IEnumerable<Inventory>> GetAllAsync()
+    public async Task<IEnumerable<Inventory>> GetAllAsync(ClaimsPrincipal user)
     {
-        return await _context.Inventories.AsNoTracking().ToListAsync();
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        var isAdmin = user.IsInRole("Admin");
+
+        if (isAdmin)
+        {
+            return await _context.Inventories
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        return await _context.Inventories
+            .Where(i => i.OwnerId == userId)
+            .AsNoTracking()
+            .ToListAsync();
     }
 
     public async Task<Inventory?> GetByIdAsync(Guid id)

@@ -28,6 +28,8 @@ public class AuthController : ControllerBase
         if (user == null)
             return Unauthorized("Invalid email or password");
 
+        var passwordValid = await _userManager.CheckPasswordAsync(user, model.Password);
+
         var result = await _signInManager.PasswordSignInAsync(
             user,
             model.Password,
@@ -35,7 +37,16 @@ public class AuthController : ControllerBase
             lockoutOnFailure: false);
 
         if (!result.Succeeded)
-            return Unauthorized("Invalid email or password");
+        {
+            return BadRequest(new
+            {
+                result.Succeeded,
+                result.IsLockedOut,
+                result.IsNotAllowed,
+                result.RequiresTwoFactor
+            });
+        }
+           // return Unauthorized("Invalid email or password");
 
         return Ok();
     }

@@ -9,11 +9,11 @@ namespace InventoryManagementApp.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ItemsController : ControllerBase
+public class ItemController : ControllerBase
 {
     private readonly ItemsService _service;
 
-    public ItemsController(ItemsService service)
+    public ItemController(ItemsService service)
     {
         _service = service;
     }

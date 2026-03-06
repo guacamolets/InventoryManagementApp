@@ -9,11 +9,11 @@ namespace InventoryManagementApp.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class InventoriesController : ControllerBase
+public class InventoryController : ControllerBase
 {
     private readonly InventoryService _service;
 
-    public InventoriesController(InventoryService service)
+    public InventoryController(InventoryService service)
     {
         _service = service;
     }
@@ -21,7 +21,7 @@ public class InventoriesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var inventories = await _service.GetAllAsync();
+        var inventories = await _service.GetAllAsync(User);
         var dto = inventories.Select(inventory => new InventoryDto
         {
             Id = inventory.Id,
@@ -133,7 +133,7 @@ public class InventoriesController : ControllerBase
     }
 
     [HttpDelete("{id}/{targetUserId}")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RemoveAccess(Guid id, string targetUserId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
