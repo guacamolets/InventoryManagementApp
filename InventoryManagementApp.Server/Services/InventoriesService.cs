@@ -4,11 +4,11 @@ using System.Security.Claims;
 
 namespace InventoryManagementApp.Server.Services;
 
-public class InventoryService
+public class InventoriesService
 {
     private readonly AppDbContext _context;
 
-    public InventoryService(AppDbContext context)
+    public InventoriesService(AppDbContext context)
     {
         _context = context;
     }
@@ -140,6 +140,29 @@ public class InventoryService
         return await _context.InventoryAccesses
             .Where(a => a.InventoryId == inventoryId)
             .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Inventory>> GetLatestAsync(int count)
+    {
+        return await _context.Inventories
+            .OrderByDescending(i => i.Id)
+            .Take(count)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Inventory>> GetTopAsync(int count)
+    {
+        return await _context.Inventories
+            .OrderByDescending(i => i.Items.Count)
+            .Take(count)
+            .ToListAsync();
+    }
+
+    public async Task<List<Tag>> GetTagCloudAsync()
+    {
+        return await _context.Tags
+            .Include(t => t.Inventories)
             .ToListAsync();
     }
 }

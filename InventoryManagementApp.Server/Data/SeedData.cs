@@ -16,11 +16,11 @@ public static class SeedData
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
-        //context.Items.RemoveRange(context.Items);
-        //context.InventoryAccesses.RemoveRange(context.InventoryAccesses);
-        //context.Inventories.RemoveRange(context.Inventories);
+        context.Items.RemoveRange(context.Items);
+        context.InventoryAccesses.RemoveRange(context.InventoryAccesses);
+        context.Inventories.RemoveRange(context.Inventories);
 
-        //await context.SaveChangesAsync();
+        await context.SaveChangesAsync();
 
         string[] roles = { "Admin", "User" };
         foreach (var role in roles)
@@ -83,6 +83,14 @@ public static class SeedData
                 Category = "Library"
             };
 
+            var booksTag = new Tag { Name = "Books" };
+            var electronicsTag = new Tag { Name = "Electronics" };
+            var rareTag = new Tag { Name = "Rare" };
+
+            inventory1.Tags = new List<Tag> { electronicsTag, rareTag };
+            inventory2.Tags = new List<Tag> { booksTag, rareTag };
+
+            context.Tags.AddRange(electronicsTag, booksTag, rareTag);
             context.Inventories.AddRange(inventory1, inventory2);
 
             var item1 = new Item

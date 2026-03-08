@@ -10,6 +10,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<Inventory> Inventories { get; set; } = null!;
     public DbSet<Item> Items { get; set; } = null!;
     public DbSet<InventoryAccess> InventoryAccesses { get; set; } = null!;
+    public DbSet<DiscussionPost> DiscussionPosts { get; set; } = null!;
+    public DbSet<Tag> Tags { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -40,5 +42,13 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
             .Property(p => p.RowVersion)
             .IsRowVersion()
             .HasColumnName("RowVersion");
+
+        builder.Entity<Inventory>()
+            .HasMany(i => i.Tags)
+            .WithMany(t => t.Inventories);
+
+        builder.Entity<Tag>()
+            .HasIndex(t => t.Name)
+            .IsUnique();
     }
 }

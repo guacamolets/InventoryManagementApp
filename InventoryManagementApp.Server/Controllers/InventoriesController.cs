@@ -3,17 +3,18 @@ using InventoryManagementApp.Server.Entities;
 using InventoryManagementApp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace InventoryManagementApp.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class InventoryController : ControllerBase
+public class InventoriesController : ControllerBase
 {
-    private readonly InventoryService _service;
+    private readonly InventoriesService _service;
 
-    public InventoryController(InventoryService service)
+    public InventoriesController(InventoriesService service)
     {
         _service = service;
     }
@@ -145,5 +146,47 @@ public class InventoryController : ControllerBase
             return Forbid();
 
         return NoContent();
+    }
+
+    [HttpGet("latest")]
+    public async Task<IActionResult> GetLatest()
+    {
+        var inventories = await _service.GetLatestAsync(10);
+
+        return Ok(inventories.Select(i => new InventoryDto
+        {
+            Id = i.Id,
+            Title = i.Title,
+            Description = i.Description,
+            OwnerId = i.OwnerId,
+            IsPublic = i.IsPublic
+        }));
+    }
+
+    [HttpGet("top")]
+    public async Task<IActionResult> GetTop()
+    {
+        var inventories = await _service.GetTopAsync(5);
+
+        return Ok(inventories.Select(i => new InventoryDto
+        {
+            Id = i.Id,
+            Title = i.Title,
+            Description = i.Description,
+            OwnerId = i.OwnerId,
+            IsPublic = i.IsPublic
+        }));
+    }
+
+    [HttpGet("tags/cloud")]
+    public async Task<IActionResult> GetTagCloud()
+    {
+        var tags = await _service.GetTagCloudAsync();
+
+        return Ok(tags.Select(t => new TagCloudDto
+        {
+            Name = t.Name,
+            Count = t.Inventories.Count()
+        }));
     }
 }

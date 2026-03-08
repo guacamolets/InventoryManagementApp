@@ -15,5 +15,6 @@ public class Inventory
     public ICollection<Item> Items { get; set; }
     [Timestamp]
     public byte[] RowVersion { get; set; } = null!;
-   
+    public List<Tag> Tags { get; set; } = new();
+
 }

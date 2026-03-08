@@ -9,19 +9,20 @@ namespace InventoryManagementApp.Server.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class ItemController : ControllerBase
+public class ItemsController : ControllerBase
 {
     private readonly ItemsService _service;
 
-    public ItemController(ItemsService service)
+    public ItemsController(ItemsService service)
     {
         _service = service;
     }
 
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetAll(Guid id)
+    [HttpGet("inventories/{inventoryId}/items")]
+    public async Task<IActionResult> GetAll(Guid inventoryId)
     {
-        var items = await _service.GetAllAsync(id);
+        var items = await _service.GetAllAsync(inventoryId);
+
         var dto = items.Select(i => new ItemDto
         {
             Id = i.Id,
@@ -34,11 +35,11 @@ public class ItemController : ControllerBase
         return Ok(dto);
     }
 
-    [HttpGet("item/{id}")]
+    [HttpGet("items/{id}")]
     public async Task<IActionResult> Get(Guid id)
     {
         var item = await _service.GetByIdAsync(id);
-        if (item == null) 
+        if (item == null)
             return NotFound();
 
         var dto = new ItemDto

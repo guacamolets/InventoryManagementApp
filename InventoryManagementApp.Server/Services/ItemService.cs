@@ -6,9 +6,9 @@ namespace InventoryManagementApp.Server.Services;
 public class ItemsService
 {
     private readonly AppDbContext _context;
-    private readonly InventoryService _inventoryService;
+    private readonly InventoriesService _inventoryService;
 
-    public ItemsService(AppDbContext context, InventoryService inventoryService)
+    public ItemsService(AppDbContext context, InventoriesService inventoryService)
     {
         _context = context;
         _inventoryService = inventoryService;
