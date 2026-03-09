@@ -187,6 +187,8 @@ public class InventoriesController : ControllerBase
         {
             Name = t.Name,
             Count = t.Inventories.Count()
-        }));
+        })
+        .OrderByDescending(t => t.Count)
+        .Take(30));
     }
 }
