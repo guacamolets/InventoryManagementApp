@@ -1,7 +1,12 @@
 ﻿using InventoryManagementApp.Server.Dto;
 using InventoryManagementApp.Server.Entities;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace InventoryManagementApp.Server.Controllers;
 
@@ -11,13 +16,16 @@ public class AuthController : ControllerBase
 {
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IConfiguration _configuration;
 
     public AuthController(
         SignInManager<ApplicationUser> signInManager,
-        UserManager<ApplicationUser> userManager)
+        UserManager<ApplicationUser> userManager,
+        IConfiguration configuration)
     {
         _signInManager = signInManager;
         _userManager = userManager;
+        _configuration = configuration;
     }
 
     [HttpPost("login")]
@@ -46,7 +54,7 @@ public class AuthController : ControllerBase
                 result.RequiresTwoFactor
             });
         }
-           // return Unauthorized("Invalid email or password");
+        // return Unauthorized("Invalid email or password");
 
         return Ok();
     }
@@ -72,5 +80,84 @@ public class AuthController : ControllerBase
             user.Email,
             user.UserName
         });
+    }
+
+    [HttpGet("google")]
+    [AllowAnonymous]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    public IActionResult GoogleLogin()
+    {
+        var properties = new AuthenticationProperties { RedirectUri = "/api/auth/response" };
+        return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+    }
+
+    [HttpGet("facebook")]
+    public IActionResult FacebookLogin()
+    {
+        var properties = new AuthenticationProperties { RedirectUri = "/api/auth/response" };
+        return Challenge(properties, FacebookDefaults.AuthenticationScheme);
+    }
+
+    [AllowAnonymous]
+    [HttpGet("response")]
+    public async Task<IActionResult> LoginCallback()
+    {
+        var authResult = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
+
+        if (!authResult.Succeeded || authResult.Principal == null)
+        {
+            return Redirect("/login");
+        }
+
+        var loginProvider = authResult.Properties.Items.ContainsKey("LoginProvider")
+        ? authResult.Properties.Items["LoginProvider"]
+        : "Google";
+
+        var principal = authResult.Principal;
+        //var loginProvider = authResult.Properties.Items["LoginProvider"];
+        var providerKey = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        var signInResult = await _signInManager.ExternalLoginSignInAsync(loginProvider, providerKey, isPersistent: true);
+
+        if (string.IsNullOrEmpty(providerKey))
+        {
+            return Content("Google ID not found in claims.");
+        }
+
+        //var info = await _signInManager.GetExternalLoginInfoAsync();
+        var frontendUrl = _configuration["FrontendUrl"];
+
+        //if (info == null)
+        //    return Redirect("/login");
+
+        //var signInResult = await _signInManager.ExternalLoginSignInAsync(
+        //    info.LoginProvider,
+        //    info.ProviderKey,
+        //    isPersistent: true
+        //);
+
+        if (signInResult.Succeeded)
+        {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+            return Redirect(frontendUrl);
+        }
+
+        var email = authResult.Principal.FindFirstValue(ClaimTypes.Email);
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            user = new ApplicationUser { UserName = email, Email = email };
+
+            var createResult = await _userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                return Content("Registration error");
+            }
+        }
+
+        await _userManager.AddLoginAsync(user, new UserLoginInfo(loginProvider, providerKey, loginProvider));
+        await _signInManager.SignInAsync(user, true);
+        await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        return Redirect(frontendUrl);
     }
 }
