@@ -2,48 +2,38 @@ import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
+import { useTranslation } from "react-i18next";
+import i18n from "i18next";
 
 export default function Navbar() {
     const { user, logout } = useContext(AuthContext);
+    const { t } = useTranslation();
+
+    const changeLanguage = (lang) => {
+        i18n.changeLanguage(lang);
+        localStorage.setItem("lang", lang);
+    };
 
     return (
         <nav style={styles.nav}>
             <div style={styles.left}>
-                <Link to="/" style={styles.logo}>
-                    Inventory App
-                </Link>
-
-                <Link to="/" style={styles.link}>
-                    Home
-                </Link>
-
-                {user && (
-                    <Link to="/inventories" style={styles.link}>
-                        My Inventories
-                    </Link>
-                )}
+                <Link to="/" style={styles.logo}> Inventory App </Link>
+                <Link to="/" style={styles.link}> Home </Link>
+                {user && (<Link to="/inventories" style={styles.link}> My Inventories </Link>)}
             </div>
 
             <div style={styles.right}>
                 <ThemeToggle />
 
-                {!user && (
-                    <>
-                        <Link to="/login" style={styles.link}>
-                            Login
-                        </Link>
-                    </>
-                )}
+                <button onClick={() => changeLanguage("en")}>EN</button>
+                <button onClick={() => changeLanguage("ru")}>RU</button>
+
+                {!user && (<Link to="/login" style={styles.link}>{t("login")}</Link>)}
 
                 {user && (
                     <>
-                        <span style={styles.user}>
-                            {user.userName}
-                        </span>
-
-                        <button onClick={logout} style={styles.button}>
-                            Logout
-                        </button>
+                        <span style={styles.user}>{user.userName}</span>
+                        <button onClick={logout} style={styles.button}>{t("logout")}</button>
                     </>
                 )}
             </div>
