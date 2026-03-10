@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,13 +41,6 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
     options.MinimumSameSitePolicy = SameSiteMode.Lax;
 });
 
-//builder.Services.ConfigureApplicationCookie(options =>
-//{
-//    options.Cookie.HttpOnly = true;
-//    options.Cookie.SameSite = SameSiteMode.None;
-//    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-//});
-
 builder.Services.Configure<IdentityOptions>(options =>
 {
     options.SignIn.RequireConfirmedEmail = false;
@@ -59,7 +51,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend",
         policy =>
         {
-            policy.WithOrigins("https://inventory-management-app-btfvdkc4ananaggy.canadacentral-01.azurewebsites.net")
+            policy.WithOrigins(builder.Configuration["FrontendUrl"])
                 .AllowAnyHeader()
                 .AllowAnyMethod();
         });
@@ -90,11 +82,15 @@ builder.Services.AddAuthentication(options =>
     options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     options.SignInScheme = IdentityConstants.ExternalScheme;
 })
-.AddFacebook(FacebookDefaults.AuthenticationScheme, options =>
+.AddGitHub(options =>
 {
-    options.AppId = builder.Configuration["Authentication:Facebook:AppId"];
-    options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"];
+    options.ClientId = builder.Configuration["Authentication:GitHub:ClientId"];
+    options.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"];
     options.SignInScheme = IdentityConstants.ExternalScheme;
+
+    //options.CallbackPath = "/signin-github";
+    //options.UserInformationEndpoint = "https://api.github.com";
+    //options.Scope.Add("user:email");
 });
 
 var app = builder.Build();
@@ -127,19 +123,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseDeveloperExceptionPage();
-
-//app.MapGet("/auth/me", (HttpContext http) =>
-//{
-//    if (http.User.Identity?.IsAuthenticated ?? false)
-//    {
-//        return Results.Ok(new
-//        {
-//            userName = http.User.Identity.Name,
-//            claims = http.User.Claims.Select(c => new { c.Type, c.Value })
-//        });
-//    }
-//    return Results.Unauthorized();
-//});
 
 app.MapControllers();
 

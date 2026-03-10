@@ -52,10 +52,10 @@ export default function LoginPage() {
                 </a>
 
                 <a
-                    href="/api/auth/facebook"
+                    href="/api/auth/github"
                     style={{ textAlign: "center", padding: "8px", background: "#1877F2", color: "#fff", borderRadius: 4 }}
                 >
-                    Login with Facebook
+                    Login with GitHub
                 </a>
             </div>
         </div>
