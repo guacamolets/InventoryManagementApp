@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 
 export default function UserPage() {
   const [owned, setOwned] = useState([]);
   const [writable, setWritable] = useState([]);
+  const navigate = useNavigate();
 
     useEffect(() => {
         const loadData = async () => {
@@ -28,7 +30,11 @@ export default function UserPage() {
         </thead>
         <tbody>
           {owned.map(inv => (
-            <tr key={inv.id}>
+            <tr
+              key={inv.id}
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate(`/inventories/${inv.id}`)}
+            >
               <td>{inv.title}</td>
               <td>{inv.description}</td>
             </tr>
@@ -46,7 +52,11 @@ export default function UserPage() {
         </thead>
         <tbody>
           {writable.map(inv => (
-            <tr key={inv.id}>
+            <tr
+              key={inv.id}
+              style={{ cursor: "pointer" }}
+              onClick={() => navigate(`/inventories/${inv.id}`)}
+            >
               <td>{inv.title}</td>
               <td>{inv.description}</td>
             </tr>

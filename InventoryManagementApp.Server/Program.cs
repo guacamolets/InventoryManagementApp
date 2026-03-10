@@ -1,9 +1,7 @@
 using InventoryManagementApp.Server.Data;
 using InventoryManagementApp.Server.Entities;
 using InventoryManagementApp.Server.Services;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -87,10 +85,6 @@ builder.Services.AddAuthentication(options =>
     options.ClientId = builder.Configuration["Authentication:GitHub:ClientId"];
     options.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"];
     options.SignInScheme = IdentityConstants.ExternalScheme;
-
-    //options.CallbackPath = "/signin-github";
-    //options.UserInformationEndpoint = "https://api.github.com";
-    //options.Scope.Add("user:email");
 });
 
 var app = builder.Build();
@@ -98,7 +92,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    //await SeedData.Initialize(services);
+    await SeedData.Initialize(services);
 }
 
 app.UseForwardedHeaders();

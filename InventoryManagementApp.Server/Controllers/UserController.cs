@@ -30,7 +30,8 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetWritable()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var inventories = await _service.GetWritableAsync(userId);
+        var isAdmin = User.IsInRole("Admin");
+        var inventories = await _service.GetWritableAsync(userId, isAdmin);
 
         return Ok(inventories);
     }

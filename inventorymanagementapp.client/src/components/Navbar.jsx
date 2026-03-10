@@ -19,7 +19,8 @@ export default function Navbar() {
             <div style={styles.left}>
                 <Link to="/" style={styles.logo}> Inventory App </Link>
                 <Link to="/" style={styles.link}> Home </Link>
-                {user && (<Link to="/inventories" style={styles.link}> My Inventories </Link>)}
+                <Link to="/profile" style={styles.link}> Profile </Link>
+                <Link to="/admin" style={styles.link}> Admin </Link>
             </div>
 
             <div style={styles.right}>

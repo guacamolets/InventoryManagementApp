@@ -20,8 +20,13 @@ public class UserService
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Inventory>> GetWritableAsync(string userId)
+    public async Task<IEnumerable<Inventory>> GetWritableAsync(string userId, bool isAdmin)
     {
+        if (isAdmin)
+        {
+            return await _context.Inventories.ToListAsync();
+        }
+
         return await _context.InventoryAccesses
             .Where(a => a.UserId == userId && a.CanWrite)
             .Select(a => a.Inventory)

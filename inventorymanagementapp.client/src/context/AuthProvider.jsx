@@ -21,13 +21,19 @@ export function AuthProvider({ children }) {
         fetchMe();
     }, []);
 
+    const login = async (email, password) => {
+        const res = await api.post("/auth/login", { email, password });
+        setUser(res.data);
+        return res.data;
+    };
+
     const logout = async () => {
         await api.post("/auth/logout", {}, { withCredentials: true });
         setUser(null);
     };
 
     return (
-        <AuthContext.Provider value={{ user, logout, fetchMe, loading }}>
+        <AuthContext.Provider value={{ user, login, logout, fetchMe, loading }}>
             {children}
         </AuthContext.Provider>
     );
