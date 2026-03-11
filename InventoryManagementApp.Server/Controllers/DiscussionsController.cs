@@ -8,7 +8,7 @@ using System.Security.Claims;
 namespace InventoryManagementApp.Server.Controllers;
 
 [ApiController]
-[Route("api/discussions")]
+[Route("api/[controller]")]
 public class DiscussionsController : ControllerBase
 {
     private readonly AppDbContext _context;

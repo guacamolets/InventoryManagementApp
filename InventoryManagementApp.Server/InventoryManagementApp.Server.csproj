@@ -31,6 +31,10 @@
     </ProjectReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\PublishProfiles\" />
+  </ItemGroup>
+
     <Target Name="BuildReact" BeforeTargets="Build">
         <Exec WorkingDirectory="../inventorymanagementapp.client" Command="npm install" />
         <Exec WorkingDirectory="../inventorymanagementapp.client" Command="npm run build" />

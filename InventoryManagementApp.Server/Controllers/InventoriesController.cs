@@ -3,7 +3,6 @@ using InventoryManagementApp.Server.Entities;
 using InventoryManagementApp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace InventoryManagementApp.Server.Controllers;
@@ -190,5 +189,17 @@ public class InventoriesController : ControllerBase
         })
         .OrderByDescending(t => t.Count)
         .Take(30));
+    }
+
+    [HttpGet("{id}/access")]
+    public async Task<IActionResult> GetInventoryAccess(Guid id)
+    {
+        var inventory = _service.GetByIdAsync(id);
+        if (inventory == null)
+            return NotFound();
+
+        var accessList = _service.GetAccessListAsync(id);
+
+        return Ok(accessList);
     }
 }

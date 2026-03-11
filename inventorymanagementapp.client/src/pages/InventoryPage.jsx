@@ -1,12 +1,13 @@
 import api from "../api/api";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import ItemsTab from "../components/ItemsTab";
+import DiscussionTab from "../components/DiscussionTab";
+import SettingsTab from "../components/SettingsTab";
 
 export default function InventoryPage() {
     const { id } = useParams();
-
     const [inventory, setInventory] = useState(null);
-    const [tab, setTab] = useState("items");
 
     useEffect(() => {
         async function load() {
@@ -21,33 +22,65 @@ export default function InventoryPage() {
         load();
     }, [id]);
 
-    if (!inventory) return <div>Loading...</div>;
+    if (!inventory) {
+        return (
+            <div className="container mt-4">
+                <div className="spinner-border" />
+            </div>
+        );
+    }
 
     const canEditSettings =
         inventory.ownerId === localStorage.getItem("userId") ||
         localStorage.getItem("role") === "Admin";
 
-    const tabs = {
-        items: <ItemsTab inventoryId={id} />,
-        discussion: <DiscussionTab inventoryId={id} />,
-        settings: <SettingsTab inventory={inventory} />
-    };
-
     return (
-        <div style={{ padding: 20 }}>
-            <h1>{inventory.title}</h1>
-            <p>{inventory.description}</p>
-
-            <div style={{ marginTop: 20 }}>
-                <button onClick={() => setTab("items")}>Items</button>
-                <button onClick={() => setTab("discussion")}>Discussion</button>
+        <div className="container mt-4">
+            <h2>{inventory.title}</h2>
+            <p className="text-muted">{inventory.description}</p>
+            <ul className="nav nav-tabs mt-4" role="tablist">
+                <li className="nav-item">
+                    <button
+                        className="nav-link active"
+                        data-bs-toggle="tab"
+                        data-bs-target="#items"
+                    >
+                        Items
+                    </button>
+                </li>
+                <li className="nav-item">
+                    <button
+                        className="nav-link"
+                        data-bs-toggle="tab"
+                        data-bs-target="#discussion"
+                    >
+                        Discussion
+                    </button>
+                </li>
                 {canEditSettings && (
-                    <button onClick={() => setTab("settings")}>Settings</button>
+                    <li className="nav-item">
+                        <button
+                            className="nav-link"
+                            data-bs-toggle="tab"
+                            data-bs-target="#settings"
+                        >
+                            Settings
+                        </button>
+                    </li>
                 )}
-            </div>
-
-            <div style={{ marginTop: 20 }}>
-                {tabs[tab]}
+            </ul>
+            <div className="tab-content mt-3">
+                <div className="tab-pane fade show active" id="items">
+                    <ItemsTab inventoryId={id} />
+                </div>
+                <div className="tab-pane fade" id="discussion">
+                    <DiscussionTab inventoryId={id} />
+                </div>
+                {canEditSettings && (
+                    <div className="tab-pane fade" id="settings">
+                        <SettingsTab inventory={inventory} />
+                    </div>
+                )}
             </div>
         </div>
     );

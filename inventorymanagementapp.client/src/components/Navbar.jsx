@@ -15,73 +15,59 @@ export default function Navbar() {
     };
 
     return (
-        <nav style={styles.nav}>
-            <div style={styles.left}>
-                <Link to="/" style={styles.logo}> Inventory App </Link>
-                <Link to="/" style={styles.link}> Home </Link>
-                <Link to="/profile" style={styles.link}> Profile </Link>
-                <Link to="/admin" style={styles.link}> Admin </Link>
-            </div>
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div className="container">
+                <Link className="navbar-brand" to="/">
+                    Inventory App
+                </Link>
+                <div className="navbar-nav me-auto">
+                    <Link className="nav-link" to="/">Home</Link>
+                    <Link className="nav-link" to="/profile">Profile</Link>
+                    {user?.role === "Admin" && (
+                        <Link className="nav-link" to="/admin">Admin</Link>
+                    )}
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                    <ThemeToggle />
+                    <div className="dropdown">
+                        <button
+                            className="btn btn-outline-light btn-sm dropdown-toggle"
+                            data-bs-toggle="dropdown"
+                        >
+                            {t("language")}
+                        </button>
+                        <ul className="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <button className="dropdown-item" onClick={() => changeLanguage("en")}>
+                                    English
+                                </button>
+                            </li>
+                            <li>
+                                <button className="dropdown-item" onClick={() => changeLanguage("ru")}>
+                                    Russian
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
 
-            <div style={styles.right}>
-                <ThemeToggle />
+                    {!user && (
+                        <Link className="btn btn-primary btn-sm" to="/login">
+                            {t("login")}
+                        </Link>
+                    )}
 
-                <button onClick={() => changeLanguage("en")}>EN</button>
-                <button onClick={() => changeLanguage("ru")}>RU</button>
-
-                {!user && (<Link to="/login" style={styles.link}>{t("login")}</Link>)}
-
-                {user && (
-                    <>
-                        <span style={styles.user}>{user.userName}</span>
-                        <button onClick={logout} style={styles.button}>{t("logout")}</button>
-                    </>
-                )}
+                    {user && (
+                        <>
+                            <span className="text-light small">
+                                {user.userName}
+                            </span>
+                            <button className="btn btn-outline-light btn-sm" onClick={logout}>
+                                {t("logout")}
+                            </button>
+                        </>
+                    )}
+                </div>
             </div>
         </nav>
     );
 }
-
-const styles = {
-    nav: {
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "12px 24px",
-        borderBottom: "1px solid var(--border)",
-        background: "var(--card)"
-    },
-
-    left: {
-        display: "flex",
-        gap: "16px",
-        alignItems: "center"
-    },
-
-    right: {
-        display: "flex",
-        gap: "16px",
-        alignItems: "center"
-    },
-
-    logo: {
-        fontWeight: "bold",
-        fontSize: "18px",
-        textDecoration: "none",
-        color: "var(--text)"
-    },
-
-    link: {
-        textDecoration: "none",
-        color: "var(--text)"
-    },
-
-    user: {
-        opacity: 0.8
-    },
-
-    button: {
-        padding: "6px 12px",
-        cursor: "pointer"
-    }
-};

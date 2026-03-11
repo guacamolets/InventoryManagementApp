@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 
 export default function HomePage() {
     const [latest, setLatest] = useState([]);
     const [top, setTop] = useState([]);
     const [tags, setTags] = useState([]);
+
+    const navigate = useNavigate();
 
     useEffect(() => {
         const load = async () => {
@@ -20,36 +23,55 @@ export default function HomePage() {
                 console.error(err);
             }
         };
+
         load();
     }, []);
 
     return (
-        <div style={{ padding: 20 }}>
-            <h2>Latest inventories</h2>
-
-            <ul>
-                {latest.map(i => (
-                    <li key={i.id}>{i.title}</li>
-                ))}
-            </ul>
-
-            <h2>Top 5 inventories</h2>
-
-            <ul>
-                {top.map(i => (
-                    <li key={i.id}>{i.title}</li>
-                ))}
-            </ul>
-
-            <div className="tag-cloud">
-                {tags.map(t => (
-                    <span
-                        key={t.name}
-                        style={{ fontSize: `${12 + t.count * 2}px`, marginRight: "10px" }}
-                    >
-                        #{t.name}
-                    </span>
-                ))}
+        <div className="container mt-4">
+            <div className="row">
+                <div className="col-md-6">
+                    <h4 className="mb-3">Latest inventories</h4>
+                    <div className="list-group">
+                        {latest.map(i => (
+                            <button
+                                key={i.id}
+                                className="list-group-item list-group-item-action"
+                                onClick={() => navigate(`/inventories/${i.id}`)}
+                            >
+                                {i.title}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+                <div className="col-md-6">
+                    <h4 className="mb-3">Top 5 inventories</h4>
+                    <div className="list-group">
+                        {top.map(i => (
+                            <button
+                                key={i.id}
+                                className="list-group-item list-group-item-action"
+                                onClick={() => navigate(`/inventories/${i.id}`)}
+                            >
+                                {i.title}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+            <div className="mt-5">
+                <h4 className="mb-3">Popular tags</h4>
+                <div className="d-flex flex-wrap gap-2">
+                    {tags.map(t => (
+                        <span
+                            key={t.name}
+                            className="badge bg-secondary"
+                            style={{ fontSize: `${12 + t.count * 2}px` }}
+                        >
+                            #{t.name}
+                        </span>
+                    ))}
+                </div>
             </div>
         </div>
     );

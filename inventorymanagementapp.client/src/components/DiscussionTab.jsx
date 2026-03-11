@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import api from "../api";
 import ReactMarkdown from "react-markdown";
+import api from "../api/api";
 
 export default function DiscussionTab({ inventoryId }) {
     const [posts, setPosts] = useState([]);
@@ -9,7 +9,7 @@ export default function DiscussionTab({ inventoryId }) {
 
     const loadPosts = async () => {
         try {
-            const res = await api.get(`/discussion/${inventoryId}`);
+            const res = await api.get(`/discussions/${inventoryId}`);
             setPosts(res.data);
             setLoading(false);
         } catch (err) {
@@ -20,16 +20,14 @@ export default function DiscussionTab({ inventoryId }) {
     useEffect(() => {
         const loadPosts = async () => {
             try {
-                const res = await api.get(`/discussion/${inventoryId}`);
+                const res = await api.get(`/discussions/${inventoryId}`);
                 setPosts(res.data);
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to load posts", err);
             }
         };
-
         loadPosts();
-
         const interval = setInterval(loadPosts, 3000);
         return () => clearInterval(interval);
     }, [inventoryId]);
@@ -37,9 +35,8 @@ export default function DiscussionTab({ inventoryId }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!newPost.trim()) return;
-
         try {
-            await api.post(`/discussion/${inventoryId}`, { content: newPost });
+            await api.post(`/discussions/${inventoryId}`, { content: newPost });
             setNewPost("");
             loadPosts();
         } catch (err) {
@@ -50,29 +47,40 @@ export default function DiscussionTab({ inventoryId }) {
     if (loading) return <div>Loading discussion...</div>;
 
     return (
-        <div>
-            <h3>Discussion</h3>
+        <div className="container-fluid">
+            <h4 className="mb-3">Discussion</h4>
 
-            <div style={{ marginBottom: 20 }}>
+            <div className="mb-3">
+                {posts.length === 0 && (
+                    <div className="text-muted">No posts yet</div>
+                )}
+
                 {posts.map(post => (
-                    <div key={post.id} style={{ padding: 10, border: "1px solid #ccc", marginBottom: 5 }}>
-                        <div style={{ fontSize: 12, color: "#555" }}>
-                            <b>{post.userName}</b> — {new Date(post.userName).toLocaleString()}
+                    <div key={post.id} className="card mb-2">
+                        <div className="card-body p-2">
+                            <div className="d-flex justify-content-between mb-1">
+                                <strong>{post.userName}</strong>
+                                <small className="text-muted">
+                                    {new Date(post.createdAt).toLocaleString()}
+                                </small>
+                            </div>
+                            <ReactMarkdown>{post.content}</ReactMarkdown>
                         </div>
-                        <ReactMarkdown>{post.text}</ReactMarkdown>
                     </div>
                 ))}
             </div>
 
             <form onSubmit={handleSubmit}>
-                <textarea
-                    value={newPost}
-                    onChange={e => setNewPost(e.target.value)}
-                    rows={3}
-                    style={{ width: "100%" }}
-                    placeholder="Write your post in Markdown..."
-                />
-                <button type="submit" style={{ marginTop: 5 }}>Post</button>
+                <div className="mb-2">
+                    <textarea
+                        className="form-control"
+                        value={newPost}
+                        onChange={e => setNewPost(e.target.value)}
+                        rows={3}
+                        placeholder="Write your post in Markdown..."
+                    />
+                </div>
+                <button className="btn btn-primary" type="submit">Post</button>
             </form>
         </div>
     );

@@ -73,12 +73,14 @@ public class AuthController : ControllerBase
             return Unauthorized();
 
         var user = await _userManager.GetUserAsync(User);
+        var roles = await _userManager.GetRolesAsync(user);
 
         return Ok(new
         {
-            user.Id,
-            user.Email,
-            user.UserName
+            userId = user.Id,
+            userEmail = user.Email,
+            userName = user.UserName,
+            role = roles.FirstOrDefault()
         });
     }
 

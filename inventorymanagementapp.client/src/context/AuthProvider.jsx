@@ -10,6 +10,8 @@ export function AuthProvider({ children }) {
         try {
             const res = await api.get("/auth/me", { withCredentials: true });
             setUser(res.data);
+            localStorage.setItem("role", res.data.role);
+            localStorage.setItem("userId", res.data.userId);
         } catch {
             setUser(null);
         } finally {
