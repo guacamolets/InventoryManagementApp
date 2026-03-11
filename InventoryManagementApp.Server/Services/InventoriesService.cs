@@ -13,6 +13,13 @@ public class InventoriesService
         _context = context;
     }
 
+    public async Task<IEnumerable<Inventory>> GetAllAsync()
+    {
+        return await _context.Inventories
+             .AsNoTracking()
+             .ToListAsync();
+    }
+
     public async Task<IEnumerable<Inventory>> GetAllAsync(ClaimsPrincipal user)
     {
         var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);

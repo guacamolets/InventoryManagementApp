@@ -3,6 +3,7 @@ using InventoryManagementApp.Server.Entities;
 using InventoryManagementApp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace InventoryManagementApp.Server.Controllers;
@@ -201,5 +202,23 @@ public class InventoriesController : ControllerBase
         var accessList = _service.GetAccessListAsync(id);
 
         return Ok(accessList);
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string q)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return BadRequest("Query is empty");
+
+        var inventories = await _service.GetAllAsync();
+        var results = inventories
+            .Where(i =>
+                (!string.IsNullOrEmpty(i.Title) && i.Title.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(i.Description) && i.Description.Contains(q, StringComparison.OrdinalIgnoreCase))
+            )
+            .Select(i => new { i.Id, i.Title, i.Description })
+            .ToList();
+
+        return Ok(results);
     }
 }

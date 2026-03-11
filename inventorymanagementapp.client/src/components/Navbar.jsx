@@ -1,11 +1,13 @@
-import { Link } from "react-router-dom";
-import { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import ThemeToggle from "./ThemeToggle";
 import { useTranslation } from "react-i18next";
 import i18n from "i18next";
 
 export default function Navbar() {
+    const [query, setQuery] = useState("");
+    const navigate = useNavigate();
     const { user, logout } = useContext(AuthContext);
     const { t } = useTranslation();
 
@@ -14,14 +16,29 @@ export default function Navbar() {
         localStorage.setItem("lang", lang);
     };
 
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (query.trim()) {
+            navigate(`/search?q=${encodeURIComponent(query)}`);
+            setQuery("");
+        }
+    };
+
     return (
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
-                <Link className="navbar-brand" to="/">
-                    Inventory App
-                </Link>
+                <a className="navbar-brand" href="/">Inventory App</a>
+                <form className="d-flex ms-auto" onSubmit={handleSearch}>
+                    <input
+                        className="form-control me-2"
+                        type="search"
+                        placeholder="Search..."
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                    />
+                    <button className="btn btn-outline-success" type="submit">Search</button>
+                </form>container-fluid
                 <div className="navbar-nav me-auto">
-                    <Link className="nav-link" to="/">Home</Link>
                     <Link className="nav-link" to="/profile">Profile</Link>
                     {user?.role === "Admin" && (
                         <Link className="nav-link" to="/admin">Admin</Link>
