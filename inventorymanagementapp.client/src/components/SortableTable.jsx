@@ -2,7 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/theme/useTheme";
 
-export default function SortableTable({ data }) {
+export default function SortableTable({ data, onDelete, isOwner }) {
     const [filter, setFilter] = useState("");
     const [sort, setSort] = useState({ column: null, asc: true });
 
@@ -53,19 +53,13 @@ export default function SortableTable({ data }) {
                 <table className="table table-hover">
                     <thead className={theme === "light" ? "table-light" : "table-dark"}>
                         <tr>
-                            <th
-                                style={{ cursor: "pointer" }}
-                                onClick={() => handleSort("title")}
-                            >
+                            <th style={{ cursor: "pointer" }} onClick={() => handleSort("title")}>
                                 Title {sortIcon("title")}
                             </th>
-
-                            <th
-                                style={{ cursor: "pointer" }}
-                                onClick={() => handleSort("description")}
-                            >
+                            <th style={{ cursor: "pointer" }} onClick={() => handleSort("description")}>
                                 Description {sortIcon("description")}
                             </th>
+                            {isOwner && <th>Actions</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -77,6 +71,19 @@ export default function SortableTable({ data }) {
                             >
                                 <td>{inv.title}</td>
                                 <td>{inv.description}</td>
+                                {isOwner && (
+                                    <td>
+                                        <button
+                                            className="btn btn-sm btn-outline-danger"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onDelete(inv.id);
+                                            }}
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
+                                )}
                             </tr>
                         ))}
                     </tbody>
