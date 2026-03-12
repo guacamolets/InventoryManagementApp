@@ -37,12 +37,35 @@ public class ItemsService
         if (!await _inventoryService.CanWriteAsync(item.InventoryId, userId, isAdmin))
             return null;
 
+        var inventory = await _context.Inventories.FindAsync(item.InventoryId);
+        if (inventory == null) 
+            return null;
+
+        if (string.IsNullOrEmpty(item.CustomId))
+        {
+            var generatedId = CustomIdGenerator.Generate(inventory.CustomIdTemplate, inventory.LastSequenceNumber);
+            item.CustomId = generatedId ?? $"TEMP-{Guid.NewGuid().ToString().Substring(0, 8)}";
+            if (inventory.CustomIdTemplate?.Contains("sequence") == true)
+            {
+                inventory.LastSequenceNumber++;
+            }
+        }
+
         item.Id = Guid.NewGuid();
         item.CreatedById = userId;
+        item.CreatedAt = DateTime.UtcNow;
+        if (string.IsNullOrEmpty(item.Name)) item.Name = "Unnamed Item";
 
         _context.Items.Add(item);
         await _context.SaveChangesAsync();
         return item;
+    }
+
+    public async Task<bool> isItemExistsAsync(Item item)
+    {
+        return await _context.Items.AnyAsync(i =>
+            i.InventoryId == item.InventoryId &&
+            i.CustomId == item.CustomId);
     }
 
     public async Task<bool> UpdateAsync(Item updated, string userId, bool isAdmin)

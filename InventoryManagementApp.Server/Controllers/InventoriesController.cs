@@ -85,7 +85,8 @@ public class InventoriesController : ControllerBase
             Title = dto.Title,
             Description = dto.Description,
             Category = dto.Category,
-            IsPublic = dto.IsPublic
+            IsPublic = dto.IsPublic,
+            CustomIdTemplate = dto.CustomIdTemplate
         };
 
         var success = await _service.UpdateAsync(id, inventory, userId!, isAdmin);

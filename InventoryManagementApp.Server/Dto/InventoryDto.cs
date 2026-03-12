@@ -18,4 +18,5 @@ public class InventoryWriteDto
     public string? Category { get; set; }
     public bool IsPublic { get; set; } = false;
     public List<string> Tags { get; set; } = new();
+    public string? CustomIdTemplate { get; set; }
 }

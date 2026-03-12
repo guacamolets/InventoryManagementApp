@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import api from "../../api/api";
+import CustomIdConstructor from "../CustomIdConstructor";
 
 export default function SettingsTab({ inventory }) {
     const [accessList, setAccessList] = useState([]);
     const [items, setItems] = useState([]);
     const [stats, setStats] = useState(null);
+    const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
         const loadAccessList = async () => {
@@ -41,28 +43,65 @@ export default function SettingsTab({ inventory }) {
         loadItems();
     }, [inventory.id]);
 
+    const handleSaveTemplate = async (templateJson) => {
+        setIsSaving(true);
+        try {
+            const payload = {
+                title: inventory.title || "Untitled",
+                description: inventory.description || "",
+                category: inventory.category || "General",
+                isPublic: !!inventory.isPublic,
+                customIdTemplate: templateJson
+            };
+            await api.put(`/inventories/${inventory.id}`, ...inventory, payload);
+        } catch (err) {
+            console.error("Failed to save template", err);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     return (
         <div className="container-fluid">
             <h4 className="mb-3">Settings</h4>
+
             <div className="card mb-3">
-                <div className="card-header">Access</div>
+                <div className="card-header bg-light fw-bold">Access Control</div>
                 <ul className="list-group list-group-flush">
                     {accessList.length === 0 && (
                         <li className="list-group-item text-muted">No users with access</li>
                     )}
                     {accessList.map(u => (
                         <li key={u.id} className="list-group-item">
-                            {u.userName} ({u.role})
+                            {u.userName} <span className="badge bg-info ms-2">{u.role}</span>
                         </li>
                     ))}
                 </ul>
             </div>
 
+            <div className="card mb-3 border-primary">
+                <div className="card-header bg-primary text-white fw-bold">
+                    Custom ID Generator Strategy
+                </div>
+                <div className="card-body">
+                    <p className="small text-muted">
+                        Configure how IDs are generated for new items in this inventory.
+                        Changes will not affect existing items.
+                    </p>
+                    <CustomIdConstructor
+                        initialTemplate={inventory.customIdTemplate}
+                        lastSequenceNumber={inventory.lastSequenceNumber}
+                        onSave={handleSaveTemplate}
+                        disabled={isSaving}
+                    />
+                </div>
+            </div>
+
             <div className="card mb-3">
-                <div className="card-header">Custom IDs</div>
-                <div className="card-body p-0">
-                    <table className="table mb-0">
-                        <thead>
+                <div className="card-header fw-bold">Current Items Preview</div>
+                <div className="card-body p-0" style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                    <table className="table table-sm mb-0">
+                        <thead className="table-light">
                             <tr>
                                 <th>Name</th>
                                 <th>Custom ID</th>
@@ -72,7 +111,7 @@ export default function SettingsTab({ inventory }) {
                             {items.map(i => (
                                 <tr key={i.id}>
                                     <td>{i.name}</td>
-                                    <td>{i.customId}</td>
+                                    <td><code className="text-primary">{i.customId}</code></td>
                                 </tr>
                             ))}
                         </tbody>
@@ -81,13 +120,13 @@ export default function SettingsTab({ inventory }) {
             </div>
 
             <div className="card mb-3">
-                <div className="card-header">Statistics</div>
+                <div className="card-header fw-bold">Statistics</div>
                 <div className="card-body">
                     {stats ? (
                         <ul className="mb-0">
-                            <li>Total items: {stats.count}</li>
-                            <li>Name length avg: {stats.nameAvg} ({stats.nameRange})</li>
-                            <li>Description length avg: {stats.descAvg} ({stats.descRange})</li>
+                            <li>Total items: <strong>{stats.count}</strong></li>
+                            <li>Name length avg: {stats.nameAvg} <small className="text-muted">({stats.nameRange})</small></li>
+                            <li>Description length avg: {stats.descAvg} <small className="text-muted">({stats.descRange})</small></li>
                         </ul>
                     ) : (
                         <p>Loading stats...</p>

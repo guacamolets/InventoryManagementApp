@@ -70,8 +70,15 @@ public class ItemsController : ControllerBase
         {
             InventoryId = dto.InventoryId,
             Name = dto.Name,
-            Description = dto.Description
+            Description = dto.Description,
+            CustomId = dto.CustomId
         };
+
+        var exists = await _service.isItemExistsAsync(item);
+        if (exists)
+        {
+            return BadRequest();
+        }
 
         var created = await _service.CreateAsync(item, userId!, isAdmin);
         if (created == null) 

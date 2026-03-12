@@ -17,4 +17,6 @@ public class Inventory
     public byte[] RowVersion { get; set; } = null!;
     public List<Tag> Tags { get; set; } = new();
 
+    public string? CustomIdTemplate { get; set; }
+    public int LastSequenceNumber { get; set; } = 0;
 }
