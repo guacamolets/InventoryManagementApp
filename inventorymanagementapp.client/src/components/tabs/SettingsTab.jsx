@@ -53,7 +53,7 @@ export default function SettingsTab({ inventory }) {
                 isPublic: !!inventory.isPublic,
                 customIdTemplate: templateJson
             };
-            await api.put(`/inventories/${inventory.id}`, ...inventory, payload);
+            await api.put(`/inventories/${inventory.id}`, payload);
         } catch (err) {
             console.error("Failed to save template", err);
         } finally {
@@ -90,8 +90,8 @@ export default function SettingsTab({ inventory }) {
                     </p>
                     <CustomIdConstructor
                         initialTemplate={inventory.customIdTemplate}
-                        lastSequenceNumber={inventory.lastSequenceNumber}
                         onSave={handleSaveTemplate}
+                        lastSequenceNumber={inventory.lastSequenceNumber}
                         disabled={isSaving}
                     />
                 </div>

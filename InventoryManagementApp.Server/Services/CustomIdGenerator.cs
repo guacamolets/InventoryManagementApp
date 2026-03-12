@@ -1,5 +1,6 @@
 ﻿using InventoryManagementApp.Server.Entities;
 using System.Text;
+using System.Text.Json;
 
 namespace InventoryManagementApp.Server.Services;
 
@@ -9,17 +10,22 @@ public static class CustomIdGenerator
 
     public static string Generate(string templateJson, int currentSequence)
     {
-        if (string.IsNullOrEmpty(templateJson)) return Guid.NewGuid().ToString().Substring(0, 8);
+        if (string.IsNullOrEmpty(templateJson))
+        {
+            return Guid.NewGuid().ToString().Substring(0, 8);
+        }
 
-        var blocks = System.Text.Json.JsonSerializer.Deserialize<List<CustomIdBlock>>(templateJson);
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var blocks = JsonSerializer.Deserialize<List<CustomIdBlock>>(templateJson, options);
         var result = new StringBuilder();
 
         foreach (var block in blocks)
         {
+            if (block?.Type == null) continue;
             switch (block.Type.ToLower())
             {
                 case "text":
-                    result.Append(block.Value);
+                    result.Append(block.Value ?? "");
                     break;
                 case "random20":
                     result.Append(_random.Next(0, 1048576));
@@ -40,11 +46,15 @@ public static class CustomIdGenerator
                     result.Append(DateTime.Now.ToString(block.Format ?? "yyyyMMdd"));
                     break;
                 case "sequence":
-                    result.Append((currentSequence + 1).ToString().PadLeft(block.Length ?? 1, '0'));
+                    int length = block.Length ?? 1;
+                    result.Append((currentSequence + 1).ToString().PadLeft(length, '0'));
+                    break;
+                default:
                     break;
             }
         }
 
-        return result.ToString();
+        var finalId = result.ToString();
+        return string.IsNullOrWhiteSpace(finalId) ? (currentSequence + 1).ToString() : finalId;
     }
 }

@@ -13,7 +13,7 @@ export default function ItemsTab({ inventoryId }) {
 
     const loadItems = useCallback(async () => {
         try {
-            const res = await api.get(`/items/inventories/${inventoryId}/items`);
+            const res = await api.get(`/items/inventories/${inventoryId}/items?_=${Date.now()}`);
             setItems(res.data);
         } catch (err) {
             console.error("Fetch error:", err);
@@ -57,11 +57,16 @@ export default function ItemsTab({ inventoryId }) {
         e.preventDefault();
         if (!name.trim()) return;
         try {
-            await api.post("/items", { inventoryId, name, description });
+            const res = await api.post("/items", { inventoryId, name, description });
             setName("");
             setDescription("");
+            setItems(prevItems => [...prevItems, res.data]);
             loadItems();
-        } catch (err) { console.error(err); }
+        } catch (err)
+        {
+            console.error(err);
+            console.error("Server Error Details:", err.response?.data);
+        }
     };
 
     return (

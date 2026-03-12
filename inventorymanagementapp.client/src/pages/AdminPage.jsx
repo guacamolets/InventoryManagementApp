@@ -13,11 +13,10 @@ export default function AdminPage() {
     };
 
     useEffect(() => {
-        const loadUsers = async () => {
-            const res = await api.get("/admin/users");
-            setUsers(res.data);
+        const fetchData = async () => {
+            loadUsers();
         };
-        loadUsers();
+        fetchData();
     }, []);
 
     const block = async (id) => {

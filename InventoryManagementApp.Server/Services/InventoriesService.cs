@@ -87,6 +87,8 @@ public class InventoriesService
         inventory.Title = updated.Title;
         inventory.Description = updated.Description;
         inventory.Category = updated.Category;
+        inventory.CustomIdTemplate = updated.CustomIdTemplate;
+        inventory.IsPublic = updated.IsPublic;
 
         await _context.SaveChangesAsync();
         return true;

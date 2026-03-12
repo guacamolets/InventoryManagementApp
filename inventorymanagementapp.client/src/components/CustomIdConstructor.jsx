@@ -5,7 +5,9 @@ import { Trash, PlusCircle, GripVertical } from 'react-bootstrap-icons';
 const BLOCK_TYPES = [
     { type: 'text', label: 'Text', defaultValue: 'INV-' },
     { type: 'random6', label: '6 numbers (Random)', defaultValue: '' },
+    { type: 'random9', label: '9 numbers (Random)' },
     { type: 'random20', label: '20-bit (Random)', defaultValue: '' },
+    { type: 'random32', label: '32-bit (Random)' },
     { type: 'date', label: 'Date', defaultValue: 'YYYYMMDD' },
     { type: 'sequence', label: 'Count (+1)', defaultValue: '3' },
     { type: 'guid', label: 'GUID', defaultValue: '' },

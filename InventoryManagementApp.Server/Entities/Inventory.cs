@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace InventoryManagementApp.Server.Entities;
 
@@ -12,6 +13,7 @@ public class Inventory
     public string? ImageUrl { get; set; }
     public string OwnerId { get; set; }
     public ApplicationUser? Owner { get; set; }
+    [JsonIgnore]
     public ICollection<Item> Items { get; set; }
     [Timestamp]
     public byte[] RowVersion { get; set; } = null!;

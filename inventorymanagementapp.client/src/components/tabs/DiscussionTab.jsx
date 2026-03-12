@@ -20,16 +20,10 @@ export default function DiscussionTab({ inventoryId }) {
     };
 
     useEffect(() => {
-        const loadPosts = async () => {
-            try {
-                const res = await api.get(`/discussions/${inventoryId}`);
-                setPosts(res.data);
-                setLoading(false);
-            } catch (err) {
-                console.error("Failed to load posts", err);
-            }
+        const fetchData = async () => {
+            loadPosts();
         };
-        loadPosts();
+        fetchData();
         const interval = setInterval(loadPosts, 4000);
         return () => clearInterval(interval);
     }, [inventoryId]);

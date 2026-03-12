@@ -49,6 +49,10 @@ public class ItemsService
             {
                 inventory.LastSequenceNumber++;
             }
+            if (string.IsNullOrWhiteSpace(item.CustomId))
+            {
+                item.CustomId = (inventory.LastSequenceNumber + 1).ToString();
+            }
         }
 
         item.Id = Guid.NewGuid();

@@ -63,8 +63,13 @@ public class ItemsController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Create([FromBody] ItemWriteDto dto)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isAdmin = User.IsInRole("Admin");
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                 ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Unauthorized("User ID not found");
+        }
 
         var item = new Item
         {
@@ -80,7 +85,7 @@ public class ItemsController : ControllerBase
             return BadRequest();
         }
 
-        var created = await _service.CreateAsync(item, userId!, isAdmin);
+        var created = await _service.CreateAsync(item, userId!, User.IsInRole("Admin"));
         if (created == null) 
             return Forbid();
 
