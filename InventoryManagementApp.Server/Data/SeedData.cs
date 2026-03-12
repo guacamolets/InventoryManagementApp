@@ -1,7 +1,5 @@
 ﻿using InventoryManagementApp.Server.Entities;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using System.Data;
 
 namespace InventoryManagementApp.Server.Data;
 
@@ -11,7 +9,6 @@ public static class SeedData
     {
         using var scope = serviceProvider.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
         var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 
@@ -19,7 +16,6 @@ public static class SeedData
         context.InventoryAccesses.RemoveRange(context.InventoryAccesses);
         context.Inventories.RemoveRange(context.Inventories);
         context.Tags.RemoveRange(context.Tags);
-
         await context.SaveChangesAsync();
 
         string[] roles = { "Admin", "User" };
@@ -33,17 +29,8 @@ public static class SeedData
         var admin = await userManager.FindByEmailAsync(adminEmail);
         if (admin == null)
         {
-            admin = new ApplicationUser
-            {
-                UserName = "Admin",
-                Email = adminEmail
-            };
-            var result = await userManager.CreateAsync(admin, "Password123!");
-            if (!result.Succeeded)
-            {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new Exception("Failed to create admin: " + errors);
-            }
+            admin = new ApplicationUser { UserName = "Admin", Email = adminEmail };
+            await userManager.CreateAsync(admin, "Password123!");
             await userManager.AddToRoleAsync(admin, "Admin");
         }
 
@@ -51,81 +38,78 @@ public static class SeedData
         var user = await userManager.FindByEmailAsync(userEmail);
         if (user == null)
         {
-            user = new ApplicationUser
-            {
-                UserName = "User",
-                Email = userEmail
-            };
-            var result = await userManager.CreateAsync(user, "Password123!");
-            if (!result.Succeeded) throw new Exception("Failed to create user");
+            user = new ApplicationUser { UserName = "User", Email = userEmail };
+            await userManager.CreateAsync(user, "Password123!");
             await userManager.AddToRoleAsync(user, "User");
         }
 
-        if (await context.Inventories.AnyAsync())
+        var electronicsTag = new Tag { Name = "Electronics" };
+        var booksTag = new Tag { Name = "Books" };
+        var furnitureTag = new Tag { Name = "Furniture" };
+        var softwareTag = new Tag { Name = "Software" };
+        var stationeryTag = new Tag { Name = "Stationery" };
+        context.Tags.AddRange(electronicsTag, booksTag, furnitureTag, softwareTag, stationeryTag);
+
+        var inventory1 = new Inventory
         {
-            context.Items.RemoveRange(context.Items);
-            context.InventoryAccesses.RemoveRange(context.InventoryAccesses);
-            context.Inventories.RemoveRange(context.Inventories);
-            context.Tags.RemoveRange(context.Tags);
+            Id = Guid.NewGuid(),
+            Title = "Office Laptops",
+            Description = "All company laptops",
+            OwnerId = admin.Id,
+            IsPublic = true,
+            Category = "Office",
+            LastSequenceNumber = 2,
+            Tags = new List<Tag> { electronicsTag, softwareTag }
+        };
 
-            await context.SaveChangesAsync();
-        }
-
-        if (!await context.Inventories.AnyAsync())
+        var inventory2 = new Inventory
         {
-            var booksTag = new Tag { Name = "Books" };
-            var electronicsTag = new Tag { Name = "Electronics" };
+            Id = Guid.NewGuid(),
+            Title = "Library Books",
+            Description = "Books in main library",
+            OwnerId = user.Id,
+            IsPublic = false,
+            Category = "Library",
+            LastSequenceNumber = 2,
+            Tags = new List<Tag> { booksTag }
+        };
 
-            context.Tags.AddRange(electronicsTag, booksTag);
+        var inventory3 = new Inventory
+        {
+            Id = Guid.NewGuid(),
+            Title = "Kitchen Supplies",
+            Description = "Inventory of all appliances and furniture in the breakroom.",
+            OwnerId = admin.Id,
+            IsPublic = true,
+            Category = "Facilities",
+            Tags = new List<Tag> { furnitureTag }
+        };
 
-            var inventory1 = new Inventory
-            {
-                Id = Guid.NewGuid(),
-                Title = "Office Laptops",
-                Description = "All company laptops",
-                OwnerId = admin.Id,
-                IsPublic = true,
-                Category = "Office",
-                Tags = new List<Tag> { electronicsTag }
-            };
+        var inventory4 = new Inventory
+        {
+            Id = Guid.NewGuid(),
+            Title = "Archive Storage",
+            Description = "Old paper documents and stationery stock.",
+            OwnerId = user.Id,
+            IsPublic = false,
+            Category = "Archive",
+            Tags = new List<Tag> { stationeryTag }
+        };
 
-            var inventory2 = new Inventory
-            {
-                Id = Guid.NewGuid(),
-                Title = "Library Books",
-                Description = "Books in main library",
-                OwnerId = user.Id,
-                IsPublic = false,
-                Category = "Library",
-                Tags = new List<Tag> { booksTag }
-            };
+        context.Inventories.AddRange(inventory1, inventory2, inventory3, inventory4);
 
-            context.Inventories.AddRange(inventory1, inventory2);
+        var items = new List<Item>
+        {
+            new Item { Id = Guid.NewGuid(), InventoryId = inventory1.Id, Name = "Dell XPS 15", Description = "Intel i9, 32GB RAM, 1TB SSD", CreatedById = admin.Id, CustomId = "LAP-001", CreatedAt = DateTime.UtcNow.AddDays(-5) },
+            new Item { Id = Guid.NewGuid(), InventoryId = inventory1.Id, Name = "MacBook Pro 16", Description = "M2 Max, 64GB RAM", CreatedById = admin.Id, CustomId = "LAP-002", CreatedAt = DateTime.UtcNow.AddDays(-4) },
+            new Item { Id = Guid.NewGuid(), InventoryId = inventory2.Id, Name = "C# in Depth", Description = "Fourth edition by Jon Skeet", CreatedById = user.Id, CustomId = "B-0001", CreatedAt = DateTime.UtcNow.AddDays(-10) },
+            new Item { Id = Guid.NewGuid(), InventoryId = inventory2.Id, Name = "Clean Code", Description = "A Handbook of Agile Software Craftsmanship", CreatedById = user.Id, CustomId = "B-0002", CreatedAt = DateTime.UtcNow.AddDays(-9) },
+            new Item { Id = Guid.NewGuid(), InventoryId = inventory3.Id, Name = "Coffee Machine", Description = "DeLonghi Magnifica S", CreatedById = admin.Id, CustomId = "KIT-a1b2c3d4", CreatedAt = DateTime.UtcNow.AddDays(-1) },
+            new Item { Id = Guid.NewGuid(), InventoryId = inventory3.Id, Name = "Microwave Ovens", Description = "Samsung Solo Microwave", CreatedById = admin.Id, CustomId = "KIT-e5f6g7h8", CreatedAt = DateTime.UtcNow }
+        };
 
-            var item1 = new Item
-            {
-                Id = Guid.NewGuid(),
-                InventoryId = inventory1.Id,
-                Name = "Dell XPS 15",
-                Description = "High-end laptop",
-                CreatedById = admin.Id,
-                CustomId = "LAP-001"
-            };
+        context.Items.AddRange(items);
 
-            var item2 = new Item
-            {
-                Id = Guid.NewGuid(),
-                InventoryId = inventory2.Id,
-                Name = "C# in Depth",
-                Description = "Programming book",
-                CreatedById = user.Id,
-                CustomId = "B-001"
-            };
-
-            context.Items.AddRange(item1, item2);
-
-            await context.SaveChangesAsync();
-        }
+        await context.SaveChangesAsync();
     }
 }
-
