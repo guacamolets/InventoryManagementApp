@@ -1,9 +1,9 @@
 import api from "../api/api";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import ItemsTab from "../components/ItemsTab";
-import DiscussionTab from "../components/DiscussionTab";
-import SettingsTab from "../components/SettingsTab";
+import ItemsTab from "../components/tabs/ItemsTab";
+import DiscussionTab from "../components/tabs/DiscussionTab";
+import SettingsTab from "../components/tabs/SettingsTab";
 
 export default function InventoryPage() {
     const { id } = useParams();

@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { AuthProvider } from "./context/AuthProvider";
-import { ThemeProvider } from "./context/ThemeProvider";
+import { AuthProvider } from "./context/auth/AuthProvider";
+import { ThemeProvider } from "./context/theme/ThemeProvider";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import "./index.css";

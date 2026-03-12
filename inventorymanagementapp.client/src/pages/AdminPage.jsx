@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "../context/theme/useTheme";
 
 export default function AdminPage() {
     const [users, setUsers] = useState([]);
