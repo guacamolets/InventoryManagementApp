@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import api from "../api/api";
-import { useTheme } from "../hooks/useTheme";
+import api from "../../api/api";
+import { useTheme } from "../../context/theme/useTheme";
 
 export default function ItemsTab({ inventoryId }) {
     const [items, setItems] = useState([]);
@@ -57,7 +57,6 @@ export default function ItemsTab({ inventoryId }) {
                         onChange={e => setName(e.target.value)}
                     />
                 </div>
-
                 <div className="col-md-5">
                     <input
                         className="form-control"
@@ -66,14 +65,12 @@ export default function ItemsTab({ inventoryId }) {
                         onChange={e => setDescription(e.target.value)}
                     />
                 </div>
-
                 <div className="col-md-3">
                     <button className="btn btn-primary w-100" type="submit">
                         Add Item
                     </button>
                 </div>
             </form>
-
             <div className="table-responsive">
                 <table className="table table-striped table-hover align-middle">
                     <thead className={theme === "light" ? "table table-light" : "table table-dark"}>
@@ -84,7 +81,6 @@ export default function ItemsTab({ inventoryId }) {
                             <th style={{ width: "120px" }}>Actions</th>
                         </tr>
                     </thead>
-
                     <tbody>
                         {items.map(i => (
                             <tr key={i.id}>
@@ -99,7 +95,6 @@ export default function ItemsTab({ inventoryId }) {
                                 </td>
                             </tr>
                         ))}
-
                         {items.length === 0 && (
                             <tr><td colSpan="4" className="text-center text-muted">No items yet</td></tr>
                         )}

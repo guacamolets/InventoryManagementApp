@@ -1,6 +1,6 @@
 ﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTheme } from "../hooks/useTheme";
+import { useTheme } from "../context/theme/useTheme";
 
 export default function SortableTable({ data }) {
     const [filter, setFilter] = useState("");

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import api from "../api/api";
+import api from "../../api/api";
 
 export default function DiscussionTab({ inventoryId }) {
     const [posts, setPosts] = useState([]);
@@ -49,12 +49,10 @@ export default function DiscussionTab({ inventoryId }) {
     return (
         <div className="container-fluid">
             <h4 className="mb-3">Discussion</h4>
-
             <div className="mb-3">
                 {posts.length === 0 && (
                     <div className="text-muted">No posts yet</div>
                 )}
-
                 {posts.map(post => (
                     <div key={post.id} className="card mb-2">
                         <div className="card-body p-2">
@@ -69,7 +67,6 @@ export default function DiscussionTab({ inventoryId }) {
                     </div>
                 ))}
             </div>
-
             <form onSubmit={handleSubmit}>
                 <div className="mb-2">
                     <textarea
