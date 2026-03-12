@@ -3,6 +3,7 @@ using InventoryManagementApp.Server.Entities;
 using InventoryManagementApp.Server.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace InventoryManagementApp.Server.Controllers;
@@ -21,6 +22,7 @@ public class ItemsController : ControllerBase
     [HttpGet("inventories/{inventoryId}/items")]
     public async Task<IActionResult> GetAll(Guid inventoryId)
     {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var items = await _service.GetAllAsync(inventoryId);
 
         var dto = items.Select(i => new ItemDto
@@ -29,7 +31,10 @@ public class ItemsController : ControllerBase
             InventoryId = i.InventoryId,
             Name = i.Name,
             Description = i.Description,
-            CreatedBy = i.CreatedBy?.UserName
+            CustomId = i.CustomId,
+            CreatedBy = i.CreatedBy?.UserName,
+            LikesCount = i.Likes?.Count() ?? 0,
+            IsLiked = i.Likes?.Any(l => l.UserId == userId) ?? false
         });
 
         return Ok(dto);
@@ -109,6 +114,19 @@ public class ItemsController : ControllerBase
             return Forbid();
 
         return NoContent();
+    }
+
+    [HttpPost("{itemId}/like")]
+    [Authorize]
+    public async Task<IActionResult> ToggleLike(Guid itemId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId)) 
+            return Unauthorized();
+
+        var (likesCount, isLiked) = await _service.ToggleLikeAsync(itemId, userId);
+        return Ok(new { likesCount, isLiked });
     }
 }
 

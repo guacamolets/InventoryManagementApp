@@ -19,6 +19,7 @@ public class ItemsService
         return await _context.Items
             .Where(i => i.InventoryId == id)
             .Include(i => i.CreatedBy)
+            .Include(i => i.Likes)
             .AsNoTracking()
             .ToListAsync();
     }
@@ -75,5 +76,27 @@ public class ItemsService
         await _context.SaveChangesAsync();
         return true;
     }
-}
 
+    public async Task<(int likesCount, bool isLiked)> ToggleLikeAsync(Guid itemId, string userId)
+    {
+        var existingLike = await _context.ItemLikes.FirstOrDefaultAsync(l => l.ItemId == itemId && l.UserId == userId);
+        bool isNowLiked;
+        if (existingLike == null)
+        {
+            _context.ItemLikes.Add(new ItemLike
+            {
+                ItemId = itemId,
+                UserId = userId
+            });
+            isNowLiked = true;
+        }
+        else
+        {
+            _context.ItemLikes.Remove(existingLike);
+            isNowLiked = false;
+        }
+
+        await _context.SaveChangesAsync();
+        return (await _context.ItemLikes.CountAsync(l => l.ItemId == itemId), isNowLiked);
+    }
+}

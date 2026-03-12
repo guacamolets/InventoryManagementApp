@@ -72,15 +72,12 @@ public class AuthController : ControllerBase
         if (!User.Identity.IsAuthenticated)
             return Unauthorized();
 
-        var user = await _userManager.GetUserAsync(User);
-        var roles = await _userManager.GetRolesAsync(user);
-
         return Ok(new
         {
-            userId = user.Id,
-            userEmail = user.Email,
-            userName = user.UserName,
-            role = roles.FirstOrDefault()
+            userId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+            userEmail = User.FindFirstValue(ClaimTypes.Email),
+            userName = User.Identity.Name,
+            role = User.FindFirstValue(ClaimTypes.Role)
         });
     }
 

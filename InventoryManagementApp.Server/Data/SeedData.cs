@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace InventoryManagementApp.Server.Data;
 
@@ -19,6 +18,7 @@ public static class SeedData
         context.Items.RemoveRange(context.Items);
         context.InventoryAccesses.RemoveRange(context.InventoryAccesses);
         context.Inventories.RemoveRange(context.Inventories);
+        context.Tags.RemoveRange(context.Tags);
 
         await context.SaveChangesAsync();
 
@@ -61,8 +61,23 @@ public static class SeedData
             await userManager.AddToRoleAsync(user, "User");
         }
 
+        if (await context.Inventories.AnyAsync())
+        {
+            context.Items.RemoveRange(context.Items);
+            context.InventoryAccesses.RemoveRange(context.InventoryAccesses);
+            context.Inventories.RemoveRange(context.Inventories);
+            context.Tags.RemoveRange(context.Tags);
+
+            await context.SaveChangesAsync();
+        }
+
         if (!await context.Inventories.AnyAsync())
         {
+            var booksTag = new Tag { Name = "Books" };
+            var electronicsTag = new Tag { Name = "Electronics" };
+
+            context.Tags.AddRange(electronicsTag, booksTag);
+
             var inventory1 = new Inventory
             {
                 Id = Guid.NewGuid(),
@@ -70,7 +85,8 @@ public static class SeedData
                 Description = "All company laptops",
                 OwnerId = admin.Id,
                 IsPublic = true,
-                Category = "Office"
+                Category = "Office",
+                Tags = new List<Tag> { electronicsTag }
             };
 
             var inventory2 = new Inventory
@@ -80,17 +96,10 @@ public static class SeedData
                 Description = "Books in main library",
                 OwnerId = user.Id,
                 IsPublic = false,
-                Category = "Library"
+                Category = "Library",
+                Tags = new List<Tag> { booksTag }
             };
 
-            var booksTag = new Tag { Name = "Books" };
-            var electronicsTag = new Tag { Name = "Electronics" };
-            var rareTag = new Tag { Name = "Rare" };
-
-            inventory1.Tags = new List<Tag> { electronicsTag, rareTag };
-            inventory2.Tags = new List<Tag> { booksTag, rareTag };
-
-            context.Tags.AddRange(electronicsTag, booksTag, rareTag);
             context.Inventories.AddRange(inventory1, inventory2);
 
             var item1 = new Item

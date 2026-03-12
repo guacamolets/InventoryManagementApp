@@ -1,7 +1,6 @@
 ﻿using InventoryManagementApp.Server.Entities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Emit;
 
 public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
@@ -12,6 +11,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     public DbSet<InventoryAccess> InventoryAccesses { get; set; } = null!;
     public DbSet<DiscussionPost> DiscussionPosts { get; set; } = null!;
     public DbSet<Tag> Tags { get; set; } = null!;
+    public DbSet<ItemLike> ItemLikes { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -50,5 +50,27 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
         builder.Entity<Tag>()
             .HasIndex(t => t.Name)
             .IsUnique();
+
+        builder.Entity<Item>()
+            .HasIndex(i => new { i.InventoryId, i.CustomId })
+            .IsUnique();
+
+        builder.Entity<ItemLike>(entity =>
+        {
+            entity.HasKey(l => new { l.ItemId, l.UserId });
+
+            entity.Property(l => l.UserId)
+                  .HasMaxLength(450);
+
+            entity.HasOne(l => l.Item)
+                  .WithMany(i => i.Likes)
+                  .HasForeignKey(l => l.ItemId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(l => l.User)
+                  .WithMany()
+                  .HasForeignKey(l => l.UserId)
+                  .OnDelete(DeleteBehavior.NoAction);
+        });
     }
 }
