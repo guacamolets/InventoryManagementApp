@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 [Authorize]
 [ApiController]
-[Route("api/user")]
+[Route("api/[controller]")]
 public class UserController : ControllerBase
 {
     private readonly UserService _service;

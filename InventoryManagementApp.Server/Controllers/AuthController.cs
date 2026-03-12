@@ -12,7 +12,7 @@ using AspNet.Security.OAuth.GitHub;
 namespace InventoryManagementApp.Server.Controllers;
 
 [ApiController]
-[Route("api/auth")]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly SignInManager<ApplicationUser> _signInManager;

@@ -30,6 +30,7 @@ public class DiscussionsController : ControllerBase
                 p.Id,
                 p.Text,
                 p.CreatedAt,
+                p.UserId,
                 UserName = p.User.UserName
             })
             .ToListAsync();
@@ -43,17 +44,27 @@ public class DiscussionsController : ControllerBase
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
         var post = new DiscussionPost
         {
+            Id = Guid.NewGuid(),
             InventoryId = dto.InventoryId,
             Text = dto.Text,
-            UserId = userId!,
+            UserId = userId,
             CreatedAt = DateTime.UtcNow
         };
 
         _context.DiscussionPosts.Add(post);
         await _context.SaveChangesAsync();
 
-        return Ok();
+        return Ok(new
+        {
+            post.Id,
+            post.Text,
+            post.CreatedAt,
+            post.UserId,
+            UserName = User.Identity?.Name
+        });
     }
 }

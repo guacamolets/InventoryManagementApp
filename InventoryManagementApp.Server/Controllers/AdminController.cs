@@ -6,7 +6,7 @@ namespace InventoryManagementApp.Server.Controllers;
 
 [Authorize(Roles = "Admin")]
 [ApiController]
-[Route("api/admin")]
+[Route("api/[controller]")]
 public class AdminController : ControllerBase
 {
     private readonly AdminService _service;
