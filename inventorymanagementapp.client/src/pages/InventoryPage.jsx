@@ -22,6 +22,10 @@ export default function InventoryPage() {
         load();
     }, [id]);
 
+    const handleInventoryUpdate = (updatedInventory) => {
+        setInventory(updatedInventory);
+    };
+
     if (!inventory) {
         return (
             <div className="container mt-4">
@@ -78,7 +82,7 @@ export default function InventoryPage() {
                 </div>
                 {canEditSettings && (
                     <div className="tab-pane fade" id="settings">
-                        <SettingsTab inventory={inventory} />
+                        <SettingsTab inventory={inventory} onUpdate={handleInventoryUpdate}/>
                     </div>
                 )}
             </div>

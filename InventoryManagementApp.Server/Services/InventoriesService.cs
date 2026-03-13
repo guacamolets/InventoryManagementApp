@@ -29,19 +29,24 @@ public class InventoriesService
         if (isAdmin)
         {
             return await _context.Inventories
+                .Include(i => i.Tags)
                 .AsNoTracking()
                 .ToListAsync();
         }
 
         return await _context.Inventories
             .Where(i => i.OwnerId == userId)
+            .Include(i => i.Tags)
             .AsNoTracking()
             .ToListAsync();
     }
 
     public async Task<Inventory?> GetByIdAsync(Guid id)
     {
-        return await _context.Inventories.AsNoTracking().FirstOrDefaultAsync(i => i.Id == id);
+        return await _context.Inventories
+            .Include(i => i.Tags)
+            .AsNoTracking()
+            .FirstOrDefaultAsync(i => i.Id == id);
     }
 
     public async Task<Inventory> CreateAsync(Inventory inventory, string userId)
@@ -74,24 +79,42 @@ public class InventoriesService
             .AnyAsync(a => a.InventoryId == inventoryId && a.UserId == userId && a.CanWrite);
     }
 
-    public async Task<bool> UpdateAsync(Guid id, Inventory updated, string userId, bool isAdmin)
+    public async Task<byte[]> UpdateAsync(Guid id, Inventory updated, string userId, bool isAdmin, List<string> tagNames)
     {
-        var inventory = await _context.Inventories.FirstOrDefaultAsync(i => i.Id == id);
+        var inventory = await _context.Inventories
+            .Include(i => i.Tags)
+            .FirstOrDefaultAsync(i => i.Id == id);
 
-        if (inventory == null)
-            return false;
+        if (inventory == null || !await CanWriteAsync(id, userId, isAdmin))
+            return null;
 
-        if (!await CanWriteAsync(id, userId, isAdmin))
-            return false;
+        _context.Entry(inventory).Property(i => i.RowVersion).OriginalValue = updated.RowVersion;
 
         inventory.Title = updated.Title;
         inventory.Description = updated.Description;
         inventory.Category = updated.Category;
         inventory.CustomIdTemplate = updated.CustomIdTemplate;
         inventory.IsPublic = updated.IsPublic;
+        inventory.ImageUrl = updated.ImageUrl;
+
+        inventory.Tags.Clear();
+        if (tagNames != null && tagNames.Any())
+        {
+            foreach (var name in tagNames)
+            {
+                var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == name);
+                if (tag == null)
+                {
+                    tag = new Tag { Id = Guid.NewGuid(), Name = name };
+                    _context.Tags.Add(tag);
+                    await _context.SaveChangesAsync();
+                }
+                inventory.Tags.Add(tag);
+            }
+        }
 
         await _context.SaveChangesAsync();
-        return true;
+        return inventory.RowVersion;
     }
 
     public async Task<bool> DeleteAsync(Guid id, string userId, bool isAdmin)
@@ -172,6 +195,15 @@ public class InventoriesService
     {
         return await _context.Tags
             .Include(t => t.Inventories)
+            .ToListAsync();
+    }
+
+    public async Task<List<string>> GetAllTagNamesAsync()
+    {
+        return await _context.Tags
+            .Select(t => t.Name)
+            .OrderBy(name => name)
+            .Distinct()
             .ToListAsync();
     }
 }

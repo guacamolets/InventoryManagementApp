@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Trash, PlusCircle, GripVertical } from 'react-bootstrap-icons';
 
@@ -13,9 +13,16 @@ const BLOCK_TYPES = [
     { type: 'guid', label: 'GUID', defaultValue: '' },
 ];
 
-export default function CustomIdConstructor({ initialTemplate, onSave, lastSequenceNumber = 0 }) {
+export default function CustomIdConstructor({ initialTemplate, template, setTemplate, onSave, lastSequenceNumber = 0 }) {
     const [blocks, setBlocks] = useState(initialTemplate ? JSON.parse(initialTemplate) : []);
-    const nextIdRef = useRef(0);
+    const nextIdRef = useRef(blocks.length);
+
+    useEffect(() => {
+        const stringified = JSON.stringify(blocks);
+        if (stringified !== template) {
+            setTemplate(stringified);
+        }
+    }, [blocks, setTemplate, template]);
 
     const preview = useMemo(() => {
         return blocks.map(b => {
@@ -51,18 +58,24 @@ export default function CustomIdConstructor({ initialTemplate, onSave, lastSeque
         setBlocks(items);
     };
 
-    return (
-        <div className="card p-3 shadow-sm">
-            <h5>Constructor Custom ID</h5>
+    const updateBlockValue = (index, val) => {
+        const newBlocks = [...blocks];
+        newBlocks[index].value = val;
+        setBlocks(newBlocks);
+    };
 
-            <div className="alert alert-dark mb-3">
-                <small className="text-muted d-block">Preview:</small>
-                <code style={{ fontSize: '1.2rem' }}>{preview || "Empty template..."}</code>
+    return (
+        <div className="card p-3 shadow-sm border-0 bg-transparent">
+            <h5 className="mb-3">ID Constructor</h5>
+
+            <div className="alert alert-dark mb-3 border-0 shadow-sm" style={{ backgroundColor: '#1e1e1e' }}>
+                <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Preview:</small>
+                <code style={{ fontSize: '1.2rem', color: '#4af626', textShadow: '0 0 5px rgba(74, 246, 38, 0.2)' }}>{preview || "Empty template..."}</code>
             </div>
 
             <div className="d-flex flex-wrap gap-2 mb-4">
                 {BLOCK_TYPES.map(bt => (
-                    <button key={bt.type} className="btn btn-outline-primary btn-sm" onClick={() => addBlock(bt)}>
+                    <button key={bt.type} className="btn btn-outline-primary btn-sm rounded-pill" onClick={() => addBlock(bt)}>
                         <PlusCircle className="me-1" /> {bt.label}
                     </button>
                 ))}
@@ -71,31 +84,30 @@ export default function CustomIdConstructor({ initialTemplate, onSave, lastSeque
             <DragDropContext onDragEnd={onDragEnd}>
                 <Droppable droppableId="blocks">
                     {(provided) => (
-                        <div {...provided.droppableProps} ref={provided.innerRef}>
+                        <div {...provided.droppableProps} ref={provided.innerRef} className="pe-2" style={{ maxHeight: '300px', overflowY: 'auto' }}>
                             {blocks.map((block, index) => (
                                 <Draggable key={block.id} draggableId={block.id} index={index}>
                                     {(provided) => (
-                                        <div ref={provided.innerRef} {...provided.draggableProps} className="d-flex align-items-center bg-light border rounded p-2 mb-2">
+                                        <div ref={provided.innerRef} {...provided.draggableProps} className="d-flex align-items-center bg-white border rounded p-2 mb-2 shadow-sm">
                                             <div {...provided.dragHandleProps} className="me-2 text-muted">
-                                                <GripVertical />
+                                                <GripVertical size={20} />
                                             </div>
-                                            <div className="flex-grow-1">
-                                                <small className="badge bg-secondary me-2">{block.type}</small>
-                                                {block.type === 'text' && (
+                                            <div className="flex-grow-1 d-flex align-items-center">
+                                                <span className="badge bg-light text-dark border me-2" style={{ minWidth: '80px' }}>{block.type}</span>
+                                                {block.type === 'text' || block.type === 'sequence' ? (
                                                     <input
                                                         type="text"
-                                                        className="form-control form-control-sm d-inline-block w-auto"
+                                                        className="form-control form-control-sm w-50"
+                                                        placeholder={block.type === 'sequence' ? "Padding (e.g. 3)" : "Text..."}
                                                         value={block.value}
-                                                        onChange={(e) => {
-                                                            const newBlocks = [...blocks];
-                                                            newBlocks[index].value = e.target.value;
-                                                            setBlocks(newBlocks);
-                                                        }}
+                                                        onChange={(e) => updateBlockValue(index, e.target.value)}
                                                     />
+                                                ) : (
+                                                    <span className="small text-muted italic">Auto-generated value</span>
                                                 )}
                                             </div>
-                                            <button className="btn btn-link text-danger p-0" onClick={() => removeBlock(block.id)}>
-                                                <Trash />
+                                            <button className="btn btn-link text-danger p-1 ms-2" onClick={() => removeBlock(block.id)}>
+                                                <Trash size={18} />
                                             </button>
                                         </div>
                                     )}
@@ -107,8 +119,8 @@ export default function CustomIdConstructor({ initialTemplate, onSave, lastSeque
                 </Droppable>
             </DragDropContext>
 
-            <button className="btn btn-success mt-3" onClick={() => onSave(JSON.stringify(blocks))}>
-                Save template
+            <button className="btn btn-primary mt-3 shadow-sm" onClick={() => onSave()}>
+                Confirm & Save Now
             </button>
         </div>
     );

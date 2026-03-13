@@ -28,8 +28,13 @@ public class InventoriesController : ControllerBase
             Id = inventory.Id,
             Title = inventory.Title,
             Description = inventory.Description,
+            Category = inventory.Category,
+            ImageUrl = inventory.ImageUrl,
+            CustomIdTemplate = inventory.CustomIdTemplate,
             OwnerId = inventory.OwnerId,
-            IsPublic = inventory.IsPublic
+            IsPublic = inventory.IsPublic,
+            Version = inventory.RowVersion != null ? Convert.ToBase64String(inventory.RowVersion) : null,
+            Tags = inventory.Tags.Select(t => new Tag { Name = t.Name }).ToList()
         });
 
         return Ok(dto);
@@ -48,8 +53,13 @@ public class InventoriesController : ControllerBase
             Id = inventory.Id,
             Title = inventory.Title,
             Description = inventory.Description,
+            Category = inventory.Category,
+            ImageUrl = inventory.ImageUrl,
+            CustomIdTemplate = inventory.CustomIdTemplate,
             OwnerId = inventory.OwnerId,
-            IsPublic = inventory.IsPublic
+            IsPublic = inventory.IsPublic,
+            Version = inventory.RowVersion != null ? Convert.ToBase64String(inventory.RowVersion) : null,
+            Tags = inventory.Tags.Select(t => new Tag { Name = t.Name }).ToList()
         };
 
         return Ok(dto);
@@ -77,24 +87,33 @@ public class InventoriesController : ControllerBase
     [Authorize]
     public async Task<IActionResult> Update(Guid id, [FromBody] InventoryWriteDto dto)
     {
+        Console.WriteLine($"Incoming Version: {dto.Version}");
+
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var isAdmin = User.IsInRole("Admin");
 
-        var inventory = new Inventory
+        var updateData = new Inventory
         {
             Title = dto.Title,
             Description = dto.Description,
             Category = dto.Category,
             IsPublic = dto.IsPublic,
-            CustomIdTemplate = dto.CustomIdTemplate
+            CustomIdTemplate = dto.CustomIdTemplate,
+            ImageUrl = dto.ImageUrl,
+            RowVersion = dto.Version != null ? Convert.FromBase64String(dto.Version) : null
         };
 
-        var success = await _service.UpdateAsync(id, inventory, userId!, isAdmin);
-
-        if (!success)
-            return Forbid();
-
-        return NoContent();
+        try
+        {
+            var updatedVersion = await _service.UpdateAsync(id, updateData, userId!, isAdmin, dto.Tags);
+            if (updatedVersion == null) return Forbid();
+            var versionString = Convert.ToBase64String(updatedVersion);
+            return Ok(new { version = versionString });
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            return Conflict(new { message = "The content has been modified by another user." });
+        }
     }
 
     [HttpDelete("{id}")]
@@ -154,13 +173,17 @@ public class InventoriesController : ControllerBase
     {
         var inventories = await _service.GetLatestAsync(10);
 
-        return Ok(inventories.Select(i => new InventoryDto
+        return Ok(inventories.Select(inventory => new InventoryDto
         {
-            Id = i.Id,
-            Title = i.Title,
-            Description = i.Description,
-            OwnerId = i.OwnerId,
-            IsPublic = i.IsPublic
+            Id = inventory.Id,
+            Title = inventory.Title,
+            Description = inventory.Description,
+            Category = inventory.Category,
+            ImageUrl = inventory.ImageUrl,
+            CustomIdTemplate = inventory.CustomIdTemplate,
+            OwnerId = inventory.OwnerId,
+            IsPublic = inventory.IsPublic,
+            Version = inventory.RowVersion != null ? Convert.ToBase64String(inventory.RowVersion) : null
         }));
     }
 
@@ -169,13 +192,17 @@ public class InventoriesController : ControllerBase
     {
         var inventories = await _service.GetTopAsync(5);
 
-        return Ok(inventories.Select(i => new InventoryDto
+        return Ok(inventories.Select(inventory => new InventoryDto
         {
-            Id = i.Id,
-            Title = i.Title,
-            Description = i.Description,
-            OwnerId = i.OwnerId,
-            IsPublic = i.IsPublic
+            Id = inventory.Id,
+            Title = inventory.Title,
+            Description = inventory.Description,
+            Category = inventory.Category,
+            ImageUrl = inventory.ImageUrl,
+            CustomIdTemplate = inventory.CustomIdTemplate,
+            OwnerId = inventory.OwnerId,
+            IsPublic = inventory.IsPublic,
+            Version = inventory.RowVersion != null ? Convert.ToBase64String(inventory.RowVersion) : null
         }));
     }
 
@@ -221,5 +248,12 @@ public class InventoriesController : ControllerBase
             .ToList();
 
         return Ok(results);
+    }
+
+    [HttpGet("tags")]
+    public async Task<IActionResult> GetTags()
+    {
+        var tags = await _service.GetAllTagNamesAsync();
+        return Ok(tags);
     }
 }
