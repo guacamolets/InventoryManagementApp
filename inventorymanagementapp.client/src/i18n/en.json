@@ -88,7 +88,9 @@
     "statNameAvg": "Name Avg",
     "statDescAvg": "Desc Avg",
     "noStats": "No data available yet",
-    "conflictError": "Conflict: The inventory was updated by another user. Please reload the page."
+    "conflictError": "Conflict: The inventory was updated by another user. Please reload the page.",
+    "labelImage": "Image Preview",
+    "noImage": "No Image Provided"
   },
   "profile": {
     "title": "User Profile",
@@ -176,6 +178,8 @@
     "removeAdminBtn": "Remove Admin",
     "makeAdminBtn": "Make Admin",
     "deleteBtn": "Delete",
-    "confirmDelete": "Delete this user?"
+    "confirmDelete": "Delete this user?",
+    "selected": "Selected",
+    "clearSelection": "Clear"
   }
 }

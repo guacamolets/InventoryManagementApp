@@ -91,9 +91,12 @@ export default function Navbar() {
                             </Link>
                         ) : (
                             <div className="d-flex align-items-center gap-2">
-                                <span className="text-muted d-none d-sm-inline small">
-                                    {user.userName}
-                                </span>
+                                    <span
+                                        className="d-none d-sm-inline small fw-medium"
+                                        style={{ color: 'var(--text)', opacity: 0.8, letterSpacing: '0.3px' }}
+                                    >
+                                        {user.userName}
+                                    </span>
                                 <button className="btn btn-outline-danger btn-sm" onClick={logout}>
                                     {t("navbar.logout")}
                                 </button>

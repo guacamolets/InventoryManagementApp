@@ -45,7 +45,9 @@ export default function InventoryPage() {
     return (
         <div className="container mt-4">
             <h2 className="fw-bold">{inventory.title}</h2>
-            <p className="text-muted">{inventory.description}</p>
+            <p style={{ color: 'var(--text)', opacity: 0.7, lineHeight: '1.5' }} className="mb-0">
+                {inventory.description}
+            </p>
 
             <ul className="nav nav-tabs mt-4" role="tablist">
                 <li className="nav-item">

@@ -171,24 +171,30 @@ export default function SettingsTab({ inventory, onUpdate }) {
             </div>
 
             <div className="card mb-4 shadow-sm border-0 overflow-hidden">
-                <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
-                    <span className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>{t("settings.sectionGeneral")}</span>
-                    {isSaving && <div className="spinner-border spinner-border-sm text-light"></div>}
+                <div className="card-header py-3" style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: 'none' }}>
+                    <div className="d-flex justify-content-between align-items-center">
+                        <span className="fw-bold text-uppercase small" style={{ letterSpacing: '1px', color: 'var(--text)', opacity: 0.8 }}>
+                            {t("settings.sectionGeneral")}
+                        </span>
+                        {isSaving && <div className="spinner-border spinner-border-sm text-light"></div>}
+                    </div>
                 </div>
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-7">
                             <div className="mb-3">
-                                <label className="form-label fw-bold small text-uppercase opacity-75">{t("settings.labelTitle")}</label>
+                                <label className="form-label fw-bold small text-uppercase" style={{ color: 'var(--text)', opacity: 0.8 }}>
+                                    {t("settings.labelTitle")}
+                                </label>
                                 <input
-                                    className="form-control border-secondary-subtle"
+                                    className="form-control border-secondary-subtle" style={{ color: 'var(--text)', opacity: 0.8 }}
                                     value={title}
                                     onChange={e => setTitle(e.target.value)}
                                 />
                             </div>
                             <div className="mb-3">
                                 <div className="d-flex justify-content-between align-items-center mb-1">
-                                    <label className="form-label fw-bold small text-uppercase opacity-75 mb-0">{t("settings.labelDesc")}</label>
+                                    <label className="form-label fw-bold small text-uppercase" style={{ color: 'var(--text)', opacity: 0.8 }}>{t("settings.labelDesc")}</label>
                                     <button
                                         className="btn btn-sm btn-link text-decoration-none p-0"
                                         onClick={() => setPreviewMarkdown(!previewMarkdown)}
@@ -213,13 +219,13 @@ export default function SettingsTab({ inventory, onUpdate }) {
 
                         <div className="col-md-5">
                             <div className="mb-3">
-                                <label className="form-label fw-bold small text-uppercase opacity-75">{t("settings.labelCategory")}</label>
+                                <label className="form-label fw-bold small text-uppercase" style={{ color: 'var(--text)', opacity: 0.8 }}>{t("settings.labelCategory")}</label>
                                 <select className="form-select border-secondary-subtle" value={category} onChange={e => setCategory(e.target.value)}>
                                     {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                                 </select>
                             </div>
                             <div className="mb-3">
-                                <label className="form-label fw-bold small text-uppercase opacity-75">{t("settings.labelTags")}</label>
+                                <label className="form-label fw-bold small text-uppercase" style={{ color: 'var(--text)', opacity: 0.8 }}>{t("settings.labelTags")}</label>
                                 <CreatableSelect
                                     isMulti
                                     options={allTags}
@@ -251,10 +257,11 @@ export default function SettingsTab({ inventory, onUpdate }) {
                             </div>
 
                             <div className="mb-3">
-                                <label className="form-label fw-bold small text-uppercase opacity-75">Image Preview</label>
+                                <label className="form-label fw-bold small text-uppercase" style={{ color: 'var(--text)', opacity: 0.8 }}>{t("settings.labelImage")}</label>
                                 <div className="input-group input-group-sm mb-2">
                                     <input
                                         className="form-control border-secondary-subtle"
+                                        style={{ color: 'var(--text)', opacity: 0.8 }}
                                         value={imageUrl}
                                         onChange={e => setImageUrl(e.target.value)}
                                         placeholder="https://..."
@@ -265,27 +272,30 @@ export default function SettingsTab({ inventory, onUpdate }) {
                                     {imageUrl ? (
                                         <img src={imageUrl} alt="Preview" style={{ maxHeight: "100%", maxWidth: "100%", objectFit: 'contain' }} />
                                     ) : (
-                                        <i className="text-muted small">No Image Provided</i>
+                                            <i className="text-muted small">{t("settings.noImage")}</i>
                                     )}
                                 </div>
                             </div>
 
                             <div className="form-check form-switch mb-3 mt-4">
                                 <input className="form-check-input" type="checkbox" id="publicSwitch" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} />
-                                <label className="form-check-label fw-bold small" htmlFor="publicSwitch">{t("settings.labelPublic")}</label>
+                                <label className="form-check-label fw-bold small" htmlFor="publicSwitch" style={{ color: 'var(--text)', opacity: 0.8, letterSpacing: '0.5px' }}>{t("settings.labelPublic")}</label>
                             </div>
                         </div>
                     </div>
                     <hr className="my-4 opacity-25" />
-                    <button className="btn btn-success px-5 py-2 fw-bold shadow-sm" onClick={() => handleSaveSettings()} disabled={isSaving}>
+                    <button className="btn btn-success w-100 px-5 py-2 fw-bold shadow-sm" onClick={() => handleSaveSettings()} disabled={isSaving}>
                         {isSaving ? t("settings.savingBtn") : t("settings.saveBtn")}
                     </button>
                 </div>
             </div>
 
             <div className="card mb-4 shadow-sm border-0 overflow-hidden">
-                <div className="card-header bg-primary text-white py-3">
-                    <span className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>{t("settings.sectionId")}</span>
+                <div className="card-header py-3"
+                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: 'none' }}>
+                    <span className="fw-bold text-uppercase small" style={{ letterSpacing: '1px', color: 'var(--text)', opacity: 0.8 }}>
+                        {t("settings.sectionId")}
+                    </span>
                 </div>
                 <div className="card-body">
                     <CustomIdConstructor
@@ -302,18 +312,22 @@ export default function SettingsTab({ inventory, onUpdate }) {
             <div className="row g-4">
                 <div className="col-md-6 d-flex">
                     <div className="card shadow-sm border-0 w-100 overflow-hidden">
-                        <div className="card-header bg-light-subtle fw-bold small text-uppercase opacity-75 py-3">
-                            {t("settings.sectionAccess")}
+                        <div className="card-header fw-bold small text-uppercase py-3"
+                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: 'none' }}>
+                            <span style={{ color: 'var(--text)', opacity: 0.8, letterSpacing: '0.5px' }}>
+                                {t("settings.sectionAccess")}
+                            </span>
                         </div>
                         <ul className="list-group list-group-flush">
                             {accessList.length === 0 ? (
-                                <li className="list-group-item text-muted small text-center py-5 bg-transparent">
+                                <li className="list-group-item text-center py-5 bg-transparent border-0"
+                                    style={{ color: 'var(--text)', opacity: 0.5 }}>
                                     {t("settings.privateNotice")}
                                 </li>
                             ) : (
                                 accessList.map(u => (
-                                    <li key={u.id} className="list-group-item d-flex justify-content-between align-items-center bg-transparent py-3">
-                                        <span className="fw-medium">{u.userName}</span>
+                                    <li key={u.id} className="list-group-item d-flex justify-content-between align-items-center bg-transparent py-3 border-0">
+                                        <span className="fw-medium" style={{ color: 'var(--text)' }}>{u.userName}</span>
                                         <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-3 rounded-pill">
                                             {u.role}
                                         </span>
@@ -326,29 +340,34 @@ export default function SettingsTab({ inventory, onUpdate }) {
 
                 <div className="col-md-6 d-flex">
                     <div className="card shadow-sm border-0 w-100 overflow-hidden">
-                        <div className="card-header bg-light-subtle fw-bold small text-uppercase opacity-75 py-3">
-                            {t("settings.sectionStats")}
+                        <div className="card-header fw-bold small text-uppercase py-3"
+                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', border: 'none' }}>
+                            <span style={{ color: 'var(--text)', opacity: 0.8, letterSpacing: '0.5px' }}>
+                                {t("settings.sectionStats")}
+                            </span>
                         </div>
                         <div className="card-body d-flex align-items-center">
                             {stats ? (
                                 <div className="row text-center w-100 g-0">
-                                    <div className="col-4 border-end">
-                                        <div className="display-6 fw-bold mb-0">{stats.count}</div>
-                                        <small className="text-muted text-uppercase fw-bold" style={{ fontSize: '0.65rem' }}>{t("settings.statTotal")}</small>
+                                    <div className="col-4">
+                                        <div className="display-6 fw-bold mb-0" style={{ color: 'var(--text)' }}>{stats.count}</div>
+                                        <small className="text-uppercase fw-bold" style={{ fontSize: '0.65rem', color: 'var(--text)', opacity: 0.5 }}>
+                                            {t("settings.statTotal")}
+                                        </small>
                                     </div>
                                     <div className="col-8 text-start ps-4 d-flex flex-column justify-content-center">
                                         <div className="mb-2">
-                                            <span className="text-muted small text-uppercase">{t("settings.statNameAvg")}:</span>
-                                            <strong className="ms-2">{stats.nameAvg} ch.</strong>
+                                            <span className="small text-uppercase" style={{ color: 'var(--text)', opacity: 0.5 }}>{t("settings.statNameAvg")}:</span>
+                                            <strong className="ms-2" style={{ color: 'var(--text)' }}>{stats.nameAvg} ch.</strong>
                                         </div>
                                         <div>
-                                            <span className="text-muted small text-uppercase">{t("settings.statDescAvg")}:</span>
-                                            <strong className="ms-2">{stats.descAvg} ch.</strong>
+                                            <span className="small text-uppercase" style={{ color: 'var(--text)', opacity: 0.5 }}>{t("settings.statDescAvg")}:</span>
+                                            <strong className="ms-2" style={{ color: 'var(--text)' }}>{stats.descAvg} ch.</strong>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="text-center w-100 py-4 text-muted">
+                                <div className="text-center w-100 py-4" style={{ color: 'var(--text)', opacity: 0.5 }}>
                                     <p className="small mb-0 italic text-uppercase">{t("settings.noStats")}</p>
                                 </div>
                             )}

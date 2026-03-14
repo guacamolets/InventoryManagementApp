@@ -68,14 +68,19 @@ export default function CustomIdConstructor({ initialTemplate, template, setTemp
     };
 
     return (
-        <div className="card p-3 shadow-sm border-0 bg-transparent">
-            <h5 className="mb-3">{t("constructor.title")}</h5>
+        <div className="card shadow-sm border-0 bg-transparent p-0">
+            <h5 className="mb-3 fw-bold small text-uppercase" style={{ color: 'var(--text)', opacity: 0.8, letterSpacing: '1px' }}>
+                {t("constructor.title")}
+            </h5>
 
-            <div className="alert alert-dark mb-3 border-0 shadow-sm" style={{ backgroundColor: '#1e1e1e' }}>
-                <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>
+            <div className="alert alert-dark mb-4 border-0 shadow-sm" style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                <small
+                    className="d-block text-uppercase fw-bold mb-1"
+                    style={{fontSize: '0.7rem', letterSpacing: '0.5px', color: 'var(--text)', opacity: 0.9}}
+                >
                     {t("constructor.previewLabel")}:
                 </small>
-                <code style={{ fontSize: '1.2rem', color: '#4af626', textShadow: '0 0 5px rgba(74, 246, 38, 0.2)' }}>
+                <code style={{ fontSize: '1.2rem', color: '#4af626', textShadow: '0 0 8px rgba(74, 246, 38, 0.3)' }}>
                     {preview}
                 </code>
             </div>
@@ -128,8 +133,8 @@ export default function CustomIdConstructor({ initialTemplate, template, setTemp
                 </Droppable>
             </DragDropContext>
 
-            <button className="btn btn-primary mt-3 shadow-sm" onClick={() => onSave()}>
-                {t("constructor.saveBtn")}
+            <button className="btn btn-success px-5 py-2 fw-bold shadow-sm" onClick={() => onSave()}>
+                {t("settings.saveBtn")}
             </button>
         </div>
     );

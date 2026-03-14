@@ -31,13 +31,38 @@ export default function LikeButton({ itemId, initialLikes, initialIsLiked, isAut
 
     return (
         <button
-            className={`btn btn-sm ${isLiked ? "text-danger" : "text-muted"}`}
+            className="btn btn-sm d-inline-flex align-items-center justify-content-center transition-all"
             onClick={toggleLike}
             disabled={loading}
-            title={isLiked ? "Unlike" : "Like"}
+            style={{
+                border: 'none',
+                background: 'transparent',
+                color: isLiked ? '#dc3545' : 'var(--text)',
+                opacity: isLiked ? 1 : 0.6,
+                padding: '4px 10px',
+                borderRadius: '20px',
+                transition: 'all 0.2s ease-in-out'
+            }}
+
+            onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(220, 53, 69, 0.1)';
+                e.currentTarget.style.opacity = 1;
+            }}
+            onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                if (!isLiked) e.currentTarget.style.opacity = 0.6;
+            }}
         >
-            {isLiked ? <HeartFill size={18} /> : <Heart size={18} />}
-            <span className="ms-1 fw-bold">{likes}</span>
+            <div className={`d-flex align-items-center ${loading ? 'opacity-50' : ''}`}>
+                {isLiked ? (
+                    <HeartFill size={18} className="animate__animated animate__heartBeat" />
+                ) : (
+                    <Heart size={18} strokeWidth={2} />
+                )}
+                <span className="ms-2 fw-bold" style={{ fontSize: '0.9rem' }}>
+                    {likes}
+                </span>
+            </div>
         </button>
     );
 }

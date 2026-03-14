@@ -42,14 +42,11 @@ export default function UserPage() {
         }
     };
 
-    const handleDelete = async (id) => {
-        if (!window.confirm(t("userPage.confirmDelete"))) return;
-        try {
-            await api.delete(`/inventories/${id}`);
-            loadData();
-        } catch (err) {
-            alert(t("userPage.deleteError"));
-        }
+    const handleDelete = async (ids) => {
+        const idsArray = Array.isArray(ids) ? ids : [ids];
+        if (!window.confirm(t("table.confirmDelete", { count: idsArray.length }))) return;
+        await Promise.all(idsArray.map(id => api.delete(`/inventories/${id}`)));
+        loadData();
     };
 
     return (
@@ -61,11 +58,7 @@ export default function UserPage() {
                 </button>
             </div>
 
-            <SortableTable
-                data={owned}
-                onDelete={handleDelete}
-                isOwner={true}
-            />
+            <SortableTable data={owned} onDelete={handleDelete} isOwner={true}/>
 
             <h3 className="mt-5 mb-4 fw-bold">{t("userPage.sharedInventories")}</h3>
             <SortableTable data={writable} isOwner={false} />
