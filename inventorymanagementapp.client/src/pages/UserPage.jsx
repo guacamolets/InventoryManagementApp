@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import api from "../api/api";
 import SortableTable from "../components/SortableTable";
 
 export default function UserPage() {
+    const { t } = useTranslation();
     const [owned, setOwned] = useState([]);
     const [writable, setWritable] = useState([]);
 
@@ -25,7 +27,7 @@ export default function UserPage() {
     }, []);
 
     const handleCreate = async () => {
-        const title = prompt("Enter inventory title:");
+        const title = prompt(t("userPage.promptTitle"));
         if (!title) return;
         try {
             await api.post("/inventories", {
@@ -36,26 +38,26 @@ export default function UserPage() {
             });
             loadData();
         } catch (err) {
-            alert("Failed to create inventory");
+            alert(t("userPage.createError"));
         }
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this inventory?")) return;
+        if (!window.confirm(t("userPage.confirmDelete"))) return;
         try {
             await api.delete(`/inventories/${id}`);
             loadData();
         } catch (err) {
-            alert("Failed to delete");
+            alert(t("userPage.deleteError"));
         }
     };
 
     return (
         <div className="container mt-4">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-                <h3>My inventories</h3>
-                <button className="btn btn-primary" onClick={handleCreate}>
-                    + Create New
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <h3 className="fw-bold">{t("userPage.myInventories")}</h3>
+                <button className="btn btn-primary shadow-sm" onClick={handleCreate}>
+                    {t("userPage.createBtn")}
                 </button>
             </div>
 
@@ -65,7 +67,7 @@ export default function UserPage() {
                 isOwner={true}
             />
 
-            <h3 className="mt-5 mb-3">Inventories with write access</h3>
+            <h3 className="mt-5 mb-4 fw-bold">{t("userPage.sharedInventories")}</h3>
             <SortableTable data={writable} isOwner={false} />
         </div>
     );

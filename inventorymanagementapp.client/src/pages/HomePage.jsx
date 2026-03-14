@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
+import { useTranslation } from "react-i18next";
 
 export default function HomePage() {
+    const { t } = useTranslation();
     const [latest, setLatest] = useState([]);
     const [top, setTop] = useState([]);
     const [tags, setTags] = useState([]);
@@ -31,7 +33,7 @@ export default function HomePage() {
         <div className="container mt-4">
             <div className="row">
                 <div className="col-md-6">
-                    <h4 className="mb-3">Latest inventories</h4>
+                    <h4 className="mb-3">{t("home.latestInventories")}</h4>
                     <div className="list-group">
                         {latest.map(i => (
                             <button
@@ -45,7 +47,7 @@ export default function HomePage() {
                     </div>
                 </div>
                 <div className="col-md-6">
-                    <h4 className="mb-3">Top 5 inventories</h4>
+                    <h4 className="mb-3">{t("home.topInventories")}</h4>
                     <div className="list-group">
                         {top.map(i => (
                             <button
@@ -60,7 +62,7 @@ export default function HomePage() {
                 </div>
             </div>
             <div className="mt-5">
-                <h4 className="mb-3">Popular tags</h4>
+                <h4 className="mb-3">{t("home.popularTags")}</h4>
                 <div className="d-flex flex-wrap gap-2">
                     {tags.map(t => (
                         <span

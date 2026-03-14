@@ -1,8 +1,10 @@
 ﻿import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/theme/useTheme";
+import { useTranslation } from "react-i18next";
 
 export default function SortableTable({ data, onDelete, isOwner }) {
+    const { t } = useTranslation();
     const [filter, setFilter] = useState("");
     const [sort, setSort] = useState({ column: null, asc: true });
 
@@ -44,7 +46,7 @@ export default function SortableTable({ data, onDelete, isOwner }) {
             <div className="mb-3">
                 <input
                     className="form-control"
-                    placeholder="Filter by title..."
+                    placeholder={t("table.filterPlaceholder")}
                     value={filter}
                     onChange={e => setFilter(e.target.value)}
                 />
@@ -54,12 +56,12 @@ export default function SortableTable({ data, onDelete, isOwner }) {
                     <thead className={theme === "light" ? "table-light" : "table-dark"}>
                         <tr>
                             <th style={{ cursor: "pointer" }} onClick={() => handleSort("title")}>
-                                Title {sortIcon("title")}
+                                {t("table.columnTitle")} {sortIcon("title")}
                             </th>
                             <th style={{ cursor: "pointer" }} onClick={() => handleSort("description")}>
-                                Description {sortIcon("description")}
+                                {t("table.columnDescription")} {sortIcon("description")}
                             </th>
-                            {isOwner && <th>Actions</th>}
+                            {isOwner && <th>{t("table.columnActions")}</th>}
                         </tr>
                     </thead>
                     <tbody>
@@ -80,7 +82,7 @@ export default function SortableTable({ data, onDelete, isOwner }) {
                                                 onDelete(inv.id);
                                             }}
                                         >
-                                            Delete
+                                            {t("table.deleteBtn")}
                                         </button>
                                     </td>
                                 )}

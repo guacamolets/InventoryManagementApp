@@ -3,17 +3,10 @@ import ReactMarkdown from "react-markdown";
 import CreatableSelect from "react-select/creatable";
 import api from "../../api/api";
 import CustomIdConstructor from "../CustomIdConstructor";
-
-const CATEGORIES = [
-    { value: "General", label: "General" },
-    { value: "Office", label: "Office" },
-    { value: "Library", label: "Library" },
-    { value: "Facilities", label: "Facilities" },
-    { value: "Archive", label: "Archive" }
-];
+import { useTranslation } from "react-i18next";
 
 export default function SettingsTab({ inventory, onUpdate }) {
-    console.log("DEBUG: inventory data from props:", inventory);
+    const { t } = useTranslation();
 
     const [title, setTitle] = useState(inventory.title || "");
     const [description, setDescription] = useState(inventory.description || "");
@@ -34,6 +27,14 @@ export default function SettingsTab({ inventory, onUpdate }) {
     const versionRef = useRef(inventory.version || "");
     const currentDataRef = useRef({});
 
+    const categories = [
+        { value: "General", label: t("categories.general") },
+        { value: "Office", label: t("categories.office") },
+        { value: "Library", label: t("categories.library") },
+        { value: "Facilities", label: t("categories.facilities") },
+        { value: "Archive", label: t("categories.archive") }
+    ];
+
     currentDataRef.current = { title, description, isPublic, category, imageUrl, selectedTags, template };
 
     useEffect(() => {
@@ -48,7 +49,7 @@ export default function SettingsTab({ inventory, onUpdate }) {
 
         setIsDirty(hasChanges);
     }, [title, description, isPublic, category, imageUrl, selectedTags, template, inventory]);
-    
+
     useEffect(() => {
         const loadInitialData = async () => {
             try {
@@ -128,12 +129,7 @@ export default function SettingsTab({ inventory, onUpdate }) {
                 if (onUpdate) {
                     onUpdate({
                         ...inventory,
-                        title: data.title,
-                        description: data.description,
-                        category: data.category,
-                        isPublic: data.isPublic,
-                        imageUrl: data.imageUrl,
-                        customIdTemplate: data.template,
+                        ...payload,
                         tags: data.selectedTags.map(t => ({ name: t.value })),
                         version: response.data.version
                     });
@@ -144,14 +140,13 @@ export default function SettingsTab({ inventory, onUpdate }) {
             setLastSaved(new Date().toLocaleTimeString());
         } catch (err) {
             if (err.response?.status === 409) {
-                console.warn("Real concurrency conflict detected.");
-                if (!isAuto) alert("Conflict: The inventory was updated by another user. Please reload the page.");
+                if (!isAuto) alert(t("settings.conflictError"));
             }
             console.error("Save failed", err);
         } finally {
             setIsSaving(false);
         }
-    }, [inventory, isDirty, isSaving, onUpdate]);
+    }, [inventory, isDirty, isSaving, onUpdate, t]);
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -163,28 +158,28 @@ export default function SettingsTab({ inventory, onUpdate }) {
     return (
         <div className="container-fluid pb-5">
             <div className="d-flex justify-content-between align-items-center mb-4">
-                <h4 className="fw-bold m-0">Inventory Settings</h4>
+                <h4 className="fw-bold m-0">{t("settings.title")}</h4>
                 <div className="small">
                     {isDirty ? (
                         <span className="badge bg-warning text-dark shadow-sm animate-pulse px-3">
-                            Unsaved changes...
+                            {t("settings.unsaved")}
                         </span>
                     ) : (
-                        lastSaved && <span className="text-success fw-bold">✓ Saved at {lastSaved}</span>
+                        lastSaved && <span className="text-success fw-bold">✓ {t("settings.savedAt", { time: lastSaved })}</span>
                     )}
                 </div>
             </div>
 
             <div className="card mb-4 shadow-sm border-0 overflow-hidden">
                 <div className="card-header bg-dark text-white d-flex justify-content-between align-items-center py-3">
-                    <span className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>General Information</span>
+                    <span className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>{t("settings.sectionGeneral")}</span>
                     {isSaving && <div className="spinner-border spinner-border-sm text-light"></div>}
                 </div>
                 <div className="card-body">
                     <div className="row">
                         <div className="col-md-7">
                             <div className="mb-3">
-                                <label className="form-label fw-bold small text-uppercase opacity-75">Title</label>
+                                <label className="form-label fw-bold small text-uppercase opacity-75">{t("settings.labelTitle")}</label>
                                 <input
                                     className="form-control border-secondary-subtle"
                                     value={title}
@@ -193,17 +188,17 @@ export default function SettingsTab({ inventory, onUpdate }) {
                             </div>
                             <div className="mb-3">
                                 <div className="d-flex justify-content-between align-items-center mb-1">
-                                    <label className="form-label fw-bold small text-uppercase opacity-75 mb-0">Description</label>
+                                    <label className="form-label fw-bold small text-uppercase opacity-75 mb-0">{t("settings.labelDesc")}</label>
                                     <button
                                         className="btn btn-sm btn-link text-decoration-none p-0"
                                         onClick={() => setPreviewMarkdown(!previewMarkdown)}
                                     >
-                                        {previewMarkdown ? "Edit Mode" : "Preview Mode"}
+                                        {previewMarkdown ? t("settings.modeEdit") : t("settings.modePreview")}
                                     </button>
                                 </div>
                                 {previewMarkdown ? (
                                     <div className="p-3 border rounded shadow-inner" style={{ minHeight: "124px", backgroundColor: 'var(--bs-tertiary-bg)' }}>
-                                        <ReactMarkdown>{description || "*No description provided*"}</ReactMarkdown>
+                                        <ReactMarkdown>{description || t("settings.noDesc")}</ReactMarkdown>
                                     </div>
                                 ) : (
                                     <textarea
@@ -218,19 +213,19 @@ export default function SettingsTab({ inventory, onUpdate }) {
 
                         <div className="col-md-5">
                             <div className="mb-3">
-                                <label className="form-label fw-bold small text-uppercase opacity-75">Category</label>
+                                <label className="form-label fw-bold small text-uppercase opacity-75">{t("settings.labelCategory")}</label>
                                 <select className="form-select border-secondary-subtle" value={category} onChange={e => setCategory(e.target.value)}>
-                                    {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                                    {categories.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
                                 </select>
                             </div>
                             <div className="mb-3">
-                                <label className="form-label fw-bold small text-uppercase opacity-75">Tags</label>
+                                <label className="form-label fw-bold small text-uppercase opacity-75">{t("settings.labelTags")}</label>
                                 <CreatableSelect
                                     isMulti
                                     options={allTags}
                                     value={selectedTags}
                                     onChange={handleTagsChange}
-                                    placeholder="Select or type..."
+                                    placeholder={t("settings.tagsPlaceholder")}
                                     classNamePrefix="react-select"
                                     styles={{
                                         control: (base) => ({
@@ -254,6 +249,7 @@ export default function SettingsTab({ inventory, onUpdate }) {
                                     }}
                                 />
                             </div>
+
                             <div className="mb-3">
                                 <label className="form-label fw-bold small text-uppercase opacity-75">Image Preview</label>
                                 <div className="input-group input-group-sm mb-2">
@@ -273,22 +269,23 @@ export default function SettingsTab({ inventory, onUpdate }) {
                                     )}
                                 </div>
                             </div>
+
                             <div className="form-check form-switch mb-3 mt-4">
                                 <input className="form-check-input" type="checkbox" id="publicSwitch" checked={isPublic} onChange={e => setIsPublic(e.target.checked)} />
-                                <label className="form-check-label fw-bold small" htmlFor="publicSwitch">Public Access</label>
+                                <label className="form-check-label fw-bold small" htmlFor="publicSwitch">{t("settings.labelPublic")}</label>
                             </div>
                         </div>
                     </div>
                     <hr className="my-4 opacity-25" />
                     <button className="btn btn-success px-5 py-2 fw-bold shadow-sm" onClick={() => handleSaveSettings()} disabled={isSaving}>
-                        {isSaving ? "Saving..." : "Save Changes"}
+                        {isSaving ? t("settings.savingBtn") : t("settings.saveBtn")}
                     </button>
                 </div>
             </div>
 
             <div className="card mb-4 shadow-sm border-0 overflow-hidden">
                 <div className="card-header bg-primary text-white py-3">
-                    <span className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>ID Generation Strategy</span>
+                    <span className="fw-bold text-uppercase small" style={{ letterSpacing: '1px' }}>{t("settings.sectionId")}</span>
                 </div>
                 <div className="card-body">
                     <CustomIdConstructor
@@ -306,12 +303,12 @@ export default function SettingsTab({ inventory, onUpdate }) {
                 <div className="col-md-6 d-flex">
                     <div className="card shadow-sm border-0 w-100 overflow-hidden">
                         <div className="card-header bg-light-subtle fw-bold small text-uppercase opacity-75 py-3">
-                            Access Control
+                            {t("settings.sectionAccess")}
                         </div>
                         <ul className="list-group list-group-flush">
                             {accessList.length === 0 ? (
                                 <li className="list-group-item text-muted small text-center py-5 bg-transparent">
-                                    Private access: Only you can manage this inventory
+                                    {t("settings.privateNotice")}
                                 </li>
                             ) : (
                                 accessList.map(u => (
@@ -330,29 +327,29 @@ export default function SettingsTab({ inventory, onUpdate }) {
                 <div className="col-md-6 d-flex">
                     <div className="card shadow-sm border-0 w-100 overflow-hidden">
                         <div className="card-header bg-light-subtle fw-bold small text-uppercase opacity-75 py-3">
-                            Statistics & Insights
+                            {t("settings.sectionStats")}
                         </div>
                         <div className="card-body d-flex align-items-center">
                             {stats ? (
                                 <div className="row text-center w-100 g-0">
                                     <div className="col-4 border-end">
                                         <div className="display-6 fw-bold mb-0">{stats.count}</div>
-                                        <small className="text-muted text-uppercase fw-bold" style={{ fontSize: '0.65rem' }}>Total Items</small>
+                                        <small className="text-muted text-uppercase fw-bold" style={{ fontSize: '0.65rem' }}>{t("settings.statTotal")}</small>
                                     </div>
                                     <div className="col-8 text-start ps-4 d-flex flex-column justify-content-center">
                                         <div className="mb-2">
-                                            <span className="text-muted small text-uppercase">Name Avg:</span>
+                                            <span className="text-muted small text-uppercase">{t("settings.statNameAvg")}:</span>
                                             <strong className="ms-2">{stats.nameAvg} ch.</strong>
                                         </div>
                                         <div>
-                                            <span className="text-muted small text-uppercase">Desc Avg:</span>
+                                            <span className="text-muted small text-uppercase">{t("settings.statDescAvg")}:</span>
                                             <strong className="ms-2">{stats.descAvg} ch.</strong>
                                         </div>
                                     </div>
                                 </div>
                             ) : (
                                 <div className="text-center w-100 py-4 text-muted">
-                                    <p className="small mb-0 italic text-uppercase">No data available yet</p>
+                                    <p className="small mb-0 italic text-uppercase">{t("settings.noStats")}</p>
                                 </div>
                             )}
                         </div>

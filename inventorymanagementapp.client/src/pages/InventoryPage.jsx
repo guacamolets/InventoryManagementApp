@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import ItemsTab from "../components/tabs/ItemsTab";
 import DiscussionTab from "../components/tabs/DiscussionTab";
 import SettingsTab from "../components/tabs/SettingsTab";
+import { useTranslation } from "react-i18next";
 
 export default function InventoryPage() {
+    const { t } = useTranslation();
     const { id } = useParams();
     const [inventory, setInventory] = useState(null);
 
@@ -16,11 +18,11 @@ export default function InventoryPage() {
                 setInventory(res.data);
             } catch (err) {
                 console.error(err);
-                alert("Failed to load inventory");
+                alert(t("inventory.loadError"));
             }
         }
         load();
-    }, [id]);
+    }, [id, t]);
 
     const handleInventoryUpdate = (updatedInventory) => {
         setInventory(updatedInventory);
@@ -28,8 +30,10 @@ export default function InventoryPage() {
 
     if (!inventory) {
         return (
-            <div className="container mt-4">
-                <div className="spinner-border" />
+            <div className="container mt-4 text-center">
+                <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">{t("common.loading")}</span>
+                </div>
             </div>
         );
     }
@@ -40,16 +44,18 @@ export default function InventoryPage() {
 
     return (
         <div className="container mt-4">
-            <h2>{inventory.title}</h2>
+            <h2 className="fw-bold">{inventory.title}</h2>
             <p className="text-muted">{inventory.description}</p>
+
             <ul className="nav nav-tabs mt-4" role="tablist">
                 <li className="nav-item">
                     <button
                         className="nav-link active"
                         data-bs-toggle="tab"
                         data-bs-target="#items"
+                        type="button"
                     >
-                        Items
+                        {t("inventory.tabs.items")}
                     </button>
                 </li>
                 <li className="nav-item">
@@ -57,8 +63,9 @@ export default function InventoryPage() {
                         className="nav-link"
                         data-bs-toggle="tab"
                         data-bs-target="#discussion"
+                        type="button"
                     >
-                        Discussion
+                        {t("inventory.tabs.discussion")}
                     </button>
                 </li>
                 {canEditSettings && (
@@ -67,12 +74,14 @@ export default function InventoryPage() {
                             className="nav-link"
                             data-bs-toggle="tab"
                             data-bs-target="#settings"
+                            type="button"
                         >
-                            Settings
+                            {t("inventory.tabs.settings")}
                         </button>
                     </li>
                 )}
             </ul>
+
             <div className="tab-content mt-3">
                 <div className="tab-pane fade show active" id="items">
                     <ItemsTab inventoryId={id} />
@@ -82,7 +91,7 @@ export default function InventoryPage() {
                 </div>
                 {canEditSettings && (
                     <div className="tab-pane fade" id="settings">
-                        <SettingsTab inventory={inventory} onUpdate={handleInventoryUpdate}/>
+                        <SettingsTab inventory={inventory} onUpdate={handleInventoryUpdate} />
                     </div>
                 )}
             </div>

@@ -1,9 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import api from "../../api/api";
 import { useTheme } from "../../context/theme/useTheme";
 import LikeButton from "../LikeButton";
 
 export default function ItemsTab({ inventoryId }) {
+    const { t } = useTranslation();
     const [items, setItems] = useState([]);
     const [selectedIds, setSelectedIds] = useState([]);
     const [name, setName] = useState("");
@@ -31,10 +33,10 @@ export default function ItemsTab({ inventoryId }) {
 
     useEffect(() => {
         const fetchData = async () => {
-            await loadData();
+            loadData();
         };
         fetchData();
-    }, [loadData]);
+    }, []);
 
     const canWrite = isAuthenticated && (userRole === "Owner" || userRole === "Editor");
 
@@ -47,7 +49,7 @@ export default function ItemsTab({ inventoryId }) {
 
     const deleteSelected = async () => {
         if (!canWrite) return;
-        if (!window.confirm(`Delete ${selectedIds.length} items?`)) return;
+        if (!window.confirm(t("items.confirmDelete", { count: selectedIds.length }))) return;
 
         try {
             for (const id of selectedIds) {
@@ -56,7 +58,7 @@ export default function ItemsTab({ inventoryId }) {
             setSelectedIds([]);
             loadData();
         } catch (err) {
-            alert("Delete failed. Insufficient permissions.");
+            alert(t("items.deleteError"));
         }
     };
 
@@ -76,11 +78,11 @@ export default function ItemsTab({ inventoryId }) {
     return (
         <div className="container-fluid py-3">
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h4 className="fw-bold">Items</h4>
+                <h4 className="fw-bold">{t("items.title")}</h4>
                 {canWrite && selectedIds.length > 0 && (
                     <div className="animate__animated animate__fadeIn">
                         <button className="btn btn-danger shadow-sm" onClick={deleteSelected}>
-                            Delete Selected ({selectedIds.length})
+                            {t("items.deleteSelectedBtn", { count: selectedIds.length })}
                         </button>
                     </div>
                 )}
@@ -89,19 +91,31 @@ export default function ItemsTab({ inventoryId }) {
             {canWrite ? (
                 <form className="row g-2 mb-4 p-3 bg-light-subtle rounded border shadow-sm" onSubmit={createItem}>
                     <div className="col-md-4">
-                        <input className="form-control" placeholder="Item Name" value={name} onChange={e => setName(e.target.value)} />
+                        <input
+                            className="form-control"
+                            placeholder={t("items.namePlaceholder")}
+                            value={name}
+                            onChange={e => setName(e.target.value)}
+                        />
                     </div>
                     <div className="col-md-6">
-                        <input className="form-control" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
+                        <input
+                            className="form-control"
+                            placeholder={t("items.descPlaceholder")}
+                            value={description}
+                            onChange={e => setDescription(e.target.value)}
+                        />
                     </div>
                     <div className="col-md-2">
-                        <button className="btn btn-success w-100 fw-bold" type="submit">Add Item</button>
+                        <button className="btn btn-success w-100 fw-bold" type="submit">
+                            {t("items.addBtn")}
+                        </button>
                     </div>
                 </form>
             ) : (
                 !isAuthenticated && (
                     <div className="alert alert-info small py-2 shadow-sm">
-                        Please <a href="/login">login</a> to add or manage items.
+                        {t("items.loginNotice")} <a href="/login" className="alert-link">{t("items.loginLink")}</a> {t("items.loginNoticeEnd")}
                     </div>
                 )
             )}
@@ -111,10 +125,10 @@ export default function ItemsTab({ inventoryId }) {
                     <thead className={theme === 'dark' ? 'table-dark' : 'table-light'}>
                         <tr>
                             {canWrite && <th style={{ width: "40px" }}></th>}
-                            <th className="small text-uppercase opacity-75">ID</th>
-                            <th className="small text-uppercase opacity-75">Name</th>
-                            <th className="small text-uppercase opacity-75">Description</th>
-                            <th className="small text-uppercase opacity-75 text-center">Actions</th>
+                            <th className="small text-uppercase opacity-75">{t("items.colId")}</th>
+                            <th className="small text-uppercase opacity-75">{t("items.colName")}</th>
+                            <th className="small text-uppercase opacity-75">{t("items.colDesc")}</th>
+                            <th className="small text-uppercase opacity-75 text-center">{t("items.colActions")}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -147,7 +161,7 @@ export default function ItemsTab({ inventoryId }) {
                 </table>
                 {items.length === 0 && (
                     <div className="p-5 text-center text-muted border-top bg-light-subtle">
-                        No items found in this inventory.
+                        {t("items.emptyList")}
                     </div>
                 )}
             </div>

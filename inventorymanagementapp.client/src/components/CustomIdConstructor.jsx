@@ -1,21 +1,23 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { Trash, PlusCircle, GripVertical } from 'react-bootstrap-icons';
-
-const BLOCK_TYPES = [
-    { type: 'text', label: 'Text', defaultValue: 'INV-' },
-    { type: 'random6', label: '6 numbers (Random)', defaultValue: '' },
-    { type: 'random9', label: '9 numbers (Random)' },
-    { type: 'random20', label: '20-bit (Random)', defaultValue: '' },
-    { type: 'random32', label: '32-bit (Random)' },
-    { type: 'date', label: 'Date', defaultValue: 'YYYYMMDD' },
-    { type: 'sequence', label: 'Count (+1)', defaultValue: '3' },
-    { type: 'guid', label: 'GUID', defaultValue: '' },
-];
+import { useTranslation } from "react-i18next";
 
 export default function CustomIdConstructor({ initialTemplate, template, setTemplate, onSave, lastSequenceNumber = 0 }) {
+    const { t } = useTranslation();
     const [blocks, setBlocks] = useState(initialTemplate ? JSON.parse(initialTemplate) : []);
     const nextIdRef = useRef(blocks.length);
+
+    const block_types = useMemo(() => [
+        { type: 'text', label: t("constructor.types.text"), defaultValue: 'INV-' },
+        { type: 'random6', label: t("constructor.types.random6"), defaultValue: '' },
+        { type: 'random9', label: t("constructor.types.random9") },
+        { type: 'random20', label: t("constructor.types.random20"), defaultValue: '' },
+        { type: 'random32', label: t("constructor.types.random32") },
+        { type: 'date', label: t("constructor.types.date"), defaultValue: 'YYYYMMDD' },
+        { type: 'sequence', label: t("constructor.types.sequence"), defaultValue: '3' },
+        { type: 'guid', label: t("constructor.types.guid"), defaultValue: '' },
+    ], [t]);
 
     useEffect(() => {
         const stringified = JSON.stringify(blocks);
@@ -25,6 +27,7 @@ export default function CustomIdConstructor({ initialTemplate, template, setTemp
     }, [blocks, setTemplate, template]);
 
     const preview = useMemo(() => {
+        if (blocks.length === 0) return t("constructor.emptyTemplate");
         return blocks.map(b => {
             if (b.type === 'text') return b.value;
             if (b.type === 'date') return new Date().toISOString().slice(0, 10).replace(/-/g, "");
@@ -36,8 +39,8 @@ export default function CustomIdConstructor({ initialTemplate, template, setTemp
             if (b.type === 'guid') return "f47ac10b";
             return '';
         }).join('');
-    }, [blocks, lastSequenceNumber]);
-    
+    }, [blocks, lastSequenceNumber, t]);
+
     const addBlock = (typeObj) => {
         const newBlock = {
             id: `block-${nextIdRef.current++}`,
@@ -66,15 +69,19 @@ export default function CustomIdConstructor({ initialTemplate, template, setTemp
 
     return (
         <div className="card p-3 shadow-sm border-0 bg-transparent">
-            <h5 className="mb-3">ID Constructor</h5>
+            <h5 className="mb-3">{t("constructor.title")}</h5>
 
             <div className="alert alert-dark mb-3 border-0 shadow-sm" style={{ backgroundColor: '#1e1e1e' }}>
-                <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>Preview:</small>
-                <code style={{ fontSize: '1.2rem', color: '#4af626', textShadow: '0 0 5px rgba(74, 246, 38, 0.2)' }}>{preview || "Empty template..."}</code>
+                <small className="text-muted d-block text-uppercase fw-bold" style={{ fontSize: '0.7rem' }}>
+                    {t("constructor.previewLabel")}:
+                </small>
+                <code style={{ fontSize: '1.2rem', color: '#4af626', textShadow: '0 0 5px rgba(74, 246, 38, 0.2)' }}>
+                    {preview}
+                </code>
             </div>
 
             <div className="d-flex flex-wrap gap-2 mb-4">
-                {BLOCK_TYPES.map(bt => (
+                {block_types.map(bt => (
                     <button key={bt.type} className="btn btn-outline-primary btn-sm rounded-pill" onClick={() => addBlock(bt)}>
                         <PlusCircle className="me-1" /> {bt.label}
                     </button>
@@ -93,17 +100,19 @@ export default function CustomIdConstructor({ initialTemplate, template, setTemp
                                                 <GripVertical size={20} />
                                             </div>
                                             <div className="flex-grow-1 d-flex align-items-center">
-                                                <span className="badge bg-light text-dark border me-2" style={{ minWidth: '80px' }}>{block.type}</span>
+                                                <span className="badge bg-light text-dark border me-2" style={{ minWidth: '80px' }}>
+                                                    {t(`constructor.badge.${block.type}`)}
+                                                </span>
                                                 {block.type === 'text' || block.type === 'sequence' ? (
                                                     <input
                                                         type="text"
                                                         className="form-control form-control-sm w-50"
-                                                        placeholder={block.type === 'sequence' ? "Padding (e.g. 3)" : "Text..."}
+                                                        placeholder={block.type === 'sequence' ? t("constructor.placeholder.padding") : t("constructor.placeholder.text")}
                                                         value={block.value}
                                                         onChange={(e) => updateBlockValue(index, e.target.value)}
                                                     />
                                                 ) : (
-                                                    <span className="small text-muted italic">Auto-generated value</span>
+                                                    <span className="small text-muted italic">{t("constructor.autoGenerated")}</span>
                                                 )}
                                             </div>
                                             <button className="btn btn-link text-danger p-1 ms-2" onClick={() => removeBlock(block.id)}>
@@ -120,7 +129,7 @@ export default function CustomIdConstructor({ initialTemplate, template, setTemp
             </DragDropContext>
 
             <button className="btn btn-primary mt-3 shadow-sm" onClick={() => onSave()}>
-                Confirm & Save Now
+                {t("constructor.saveBtn")}
             </button>
         </div>
     );

@@ -1,15 +1,17 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import api from "../../api/api";
+import { useTranslation } from "react-i18next";
 
 export default function DiscussionTab({ inventoryId }) {
+    const { t } = useTranslation();
     const [posts, setPosts] = useState([]);
     const [newPost, setNewPost] = useState("");
     const [loading, setLoading] = useState(true);
     const scrollRef = useRef(null);
 
-    const loadPosts = async () => {
+    const loadData = useCallback(async () => {
         try {
             const res = await api.get(`/discussions/${inventoryId}`);
             setPosts(res.data);
@@ -17,16 +19,16 @@ export default function DiscussionTab({ inventoryId }) {
         } catch (err) {
             console.error("Failed to load posts", err);
         }
-    };
+    }, [inventoryId]);
 
     useEffect(() => {
         const fetchData = async () => {
-            loadPosts();
+            loadData();
         };
         fetchData();
-        const interval = setInterval(loadPosts, 4000);
+        const interval = setInterval(loadData, 4000);
         return () => clearInterval(interval);
-    }, [inventoryId]);
+    }, []);
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -43,24 +45,28 @@ export default function DiscussionTab({ inventoryId }) {
                 text: newPost
             });
             setNewPost("");
-            loadPosts();
+            loadData();
         } catch (err) {
             console.error("Failed to post message", err);
         }
     };
 
-    if (loading) return <div className="p-3 text-center">Loading discussion...</div>;
+    if (loading) {
+        return <div className="p-3 text-center text-muted">{t("discussion.loading")}</div>;
+    }
 
     return (
         <div className="d-flex flex-column h-100">
-            <h4 className="mb-3 px-3">Discussion</h4>
+            <h4 className="mb-3 px-3 fw-bold">{t("discussion.title")}</h4>
             <div
                 ref={scrollRef}
                 className="flex-grow-1 overflow-auto mb-3 px-3"
                 style={{ maxHeight: "500px", borderBottom: "1px solid #eee" }}
             >
                 {posts.length === 0 ? (
-                    <div className="text-center text-muted my-5">No posts yet. Start the conversation!</div>
+                    <div className="text-center text-muted my-5">
+                        {t("discussion.noPosts")}
+                    </div>
                 ) : (
                     posts.map(post => (
                         <div key={post.id} className="card mb-2 border-0 shadow-sm">
@@ -76,7 +82,7 @@ export default function DiscussionTab({ inventoryId }) {
                                         {new Date(post.createdAt).toLocaleString()}
                                     </small>
                                 </div>
-                                <div className="markdown-content">
+                                <div className="markdown-content text-break">
                                     <ReactMarkdown>{post.text}</ReactMarkdown>
                                 </div>
                             </div>
@@ -91,13 +97,19 @@ export default function DiscussionTab({ inventoryId }) {
                         value={newPost}
                         onChange={e => setNewPost(e.target.value)}
                         rows={3}
-                        placeholder="Write a comment... (Markdown supported)"
+                        placeholder={t("discussion.placeholder")}
                     />
                 </div>
                 <div className="d-flex justify-content-between align-items-center">
-                    <small className="text-muted italic">Markdown enabled</small>
-                    <button className="btn btn-primary px-4" type="submit" disabled={!newPost.trim()}>
-                        Send Post
+                    <small className="text-muted opacity-75 small">
+                        {t("discussion.markdownHint")}
+                    </small>
+                    <button
+                        className="btn btn-primary px-4 shadow-sm"
+                        type="submit"
+                        disabled={!newPost.trim()}
+                    >
+                        {t("discussion.sendBtn")}
                     </button>
                 </div>
             </form>

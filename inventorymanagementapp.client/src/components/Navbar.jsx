@@ -26,9 +26,9 @@ export default function Navbar() {
     };
 
     return (
-        <nav className={`navbar navbar-expand-lg ${theme === "light" ? "navbar-light bg-light" : "navbar-dark bg-dark"} border-bottom`}>
+        <nav className={`navbar navbar-expand-lg ${theme === "light" ? "navbar-light bg-light" : "navbar-dark bg-dark"} border-bottom shadow-sm`}>
             <div className="container-fluid px-4">
-                <Link className="navbar-brand fw-bold" to="/">Inventory App</Link>
+                <Link className="navbar-brand fw-bold" to="/">{t("navbar.brand")}</Link>
                 <button
                     className="navbar-toggler"
                     type="button"
@@ -40,11 +40,11 @@ export default function Navbar() {
                 <div className="collapse navbar-collapse" id="navbarContent">
                     <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                         <li className="nav-item">
-                            <Link className="nav-link" to="/profile">Profile</Link>
+                            <Link className="nav-link" to="/profile">{t("navbar.profile")}</Link>
                         </li>
                         {user?.role === "Admin" && (
                             <li className="nav-item">
-                                <Link className="nav-link text-warning" to="/admin">Admin</Link>
+                                <Link className="nav-link text-warning" to="/admin">{t("navbar.admin")}</Link>
                             </li>
                         )}
                     </ul>
@@ -52,11 +52,13 @@ export default function Navbar() {
                         <input
                             className="form-control me-2"
                             type="search"
-                            placeholder="Search..."
+                            placeholder={t("navbar.searchPlaceholder")}
                             value={query}
                             onChange={(e) => setQuery(e.target.value)}
                         />
-                        <button className="btn btn-outline-success" type="submit">Search</button>
+                        <button className="btn btn-outline-success" type="submit">
+                            {t("navbar.searchBtn")}
+                        </button>
                     </form>
                     <div className="d-flex align-items-center gap-3 ms-lg-3">
                         <button className="btn btn-sm btn-outline-secondary border-0" onClick={toggleTheme}>
@@ -68,16 +70,24 @@ export default function Navbar() {
                                 type="button"
                                 data-bs-toggle="dropdown"
                             >
-                                {t("language")}
+                                {t("navbar.language")}
                             </button>
                             <ul className="dropdown-menu dropdown-menu-end shadow">
-                                <li><button className="dropdown-item" onClick={() => changeLanguage("en")}>English</button></li>
-                                <li><button className="dropdown-item" onClick={() => changeLanguage("ru")}>Russian</button></li>
+                                <li>
+                                    <button className="dropdown-item" onClick={() => changeLanguage("en")}>
+                                        {t("navbar.langEn")}
+                                    </button>
+                                </li>
+                                <li>
+                                    <button className="dropdown-item" onClick={() => changeLanguage("ru")}>
+                                        {t("navbar.langRu")}
+                                    </button>
+                                </li>
                             </ul>
                         </div>
                         {!user ? (
-                            <Link className="btn btn-primary btn-sm" to="/login">
-                                {t("login")}
+                            <Link className="btn btn-primary btn-sm px-3" to="/login">
+                                {t("navbar.login")}
                             </Link>
                         ) : (
                             <div className="d-flex align-items-center gap-2">
@@ -85,7 +95,7 @@ export default function Navbar() {
                                     {user.userName}
                                 </span>
                                 <button className="btn btn-outline-danger btn-sm" onClick={logout}>
-                                    {t("logout")}
+                                    {t("navbar.logout")}
                                 </button>
                             </div>
                         )}

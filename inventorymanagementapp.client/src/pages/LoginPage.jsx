@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useAuth } from "../context/auth/useAuth";
+import { useTranslation } from "react-i18next";
 
 export default function LoginPage() {
+    const { t } = useTranslation();
     const { login } = useAuth();
 
     const [email, setEmail] = useState("");
@@ -14,7 +16,7 @@ export default function LoginPage() {
             await login(email, password);
             window.location.href = "/";
         } catch {
-            setError("Invalid credentials");
+            setError(t("auth.invalidCredentials"));
         }
     };
 
@@ -24,11 +26,11 @@ export default function LoginPage() {
                 <div className="col-md-4">
                     <div className="card shadow">
                         <div className="card-body">
-                            <h3 className="card-title text-center mb-4">Login</h3>
+                            <h3 className="card-title text-center mb-4">{t("auth.loginTitle")}</h3>
                             {error && (<div className="alert alert-danger">{error}</div>)}
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
-                                    <label className="form-label">Email</label>
+                                    <label className="form-label">{t("auth.emailLabel")}</label>
                                     <input
                                         type="email"
                                         className="form-control"
@@ -38,7 +40,7 @@ export default function LoginPage() {
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label className="form-label">Password</label>
+                                    <label className="form-label">{t("auth.passwordLabel")}</label>
                                     <input
                                         type="password"
                                         className="form-control"
@@ -47,12 +49,18 @@ export default function LoginPage() {
                                         required
                                     />
                                 </div>
-                                <button type="submit" className="btn btn-primary w-100">Login</button>
+                                <button type="submit" className="btn btn-primary w-100">
+                                    {t("auth.loginBtn")}
+                                </button>
                             </form>
                             <hr />
                             <div className="d-grid gap-2">
-                                <a href="/api/auth/google" className="btn btn-danger">Login with Google</a>
-                                <a href="/api/auth/github" className="btn btn-dark">Login with GitHub</a>
+                                <a href="/api/auth/google" className="btn btn-danger">
+                                    {t("auth.googleLogin")}
+                                </a>
+                                <a href="/api/auth/github" className="btn btn-dark">
+                                    {t("auth.githubLogin")}
+                                </a>
                             </div>
                         </div>
                     </div>
