@@ -45,7 +45,7 @@ export default function AdminPage() {
 
     const bulkDelete = async () => {
         if (!window.confirm(t("admin.confirmDelete"))) return;
-        await Promise.all(selectedUserIds.map(id => api.delete(`/admin/delete/${id}`)));
+        await Promise.all(selectedUserIds.map(id => api.delete(`/admin/${id}`)));
         loadUsers();
         clearSelection();
     };
@@ -77,6 +77,11 @@ export default function AdminPage() {
                         <button className="btn btn-outline-primary btn-sm px-3 rounded-pill fw-bold"
                             onClick={() => bulkAction(() => Promise.all(selectedUserIds.map(id => api.post(`/admin/make-admin/${id}`))))}>
                             {t("admin.makeAdminBtn")}
+                        </button>
+
+                        <button className="btn btn-outline-secondary btn-sm px-3 rounded-pill fw-bold"
+                            onClick={() => bulkAction(() => Promise.all(selectedUserIds.map(id => api.post(`/admin/remove-admin/${id}`))))}>
+                            {t("admin.removeAdminBtn")}
                         </button>
 
                         <button className="btn btn-outline-danger btn-sm px-3 rounded-pill fw-bold" onClick={bulkDelete}>
