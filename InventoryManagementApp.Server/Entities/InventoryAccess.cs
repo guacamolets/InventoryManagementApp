@@ -9,4 +9,3 @@ public class InventoryAccess
     public bool CanWrite { get; set; }
     public Inventory Inventory { get; set; } = null!;
 }
-

@@ -175,6 +175,27 @@ public class InventoriesService
             .ToListAsync();
     }
 
+    public async Task<string> GetUserRoleAsync(Guid inventoryId, string userId, bool isAdmin)
+    {
+        if (isAdmin) return "Owner";
+
+        var inventory = await _context.Inventories
+            .AsNoTracking()
+            .Select(i => new { i.Id, i.OwnerId })
+            .FirstOrDefaultAsync(i => i.Id == inventoryId);
+
+        if (inventory == null) return "Viewer";
+        if (inventory.OwnerId == userId) return "Owner";
+
+        var access = await _context.InventoryAccesses
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.InventoryId == inventoryId && a.UserId == userId);
+
+        if (access != null) return access.CanWrite ? "Editor" : "Viewer";
+
+        return "Viewer";
+    }
+
     public async Task<IEnumerable<Inventory>> GetLatestAsync(int count)
     {
         return await _context.Inventories

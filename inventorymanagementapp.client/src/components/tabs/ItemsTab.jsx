@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import api from "../../api/api";
 import { useTheme } from "../../context/theme/useTheme";
-import LikeButton from "../LikeButton"; 
+import LikeButton from "../LikeButton";
 
 export default function ItemsTab({ inventoryId }) {
     const [items, setItems] = useState([]);
@@ -9,37 +9,44 @@ export default function ItemsTab({ inventoryId }) {
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [userRole, setUserRole] = useState("Viewer");
+
     const { theme } = useTheme();
 
-    const loadItems = useCallback(async () => {
+    const loadData = useCallback(async () => {
         try {
-            const res = await api.get(`/items/inventories/${inventoryId}/items?_=${Date.now()}`);
-            setItems(res.data);
+            const [itemsRes, authRes] = await Promise.all([
+                api.get(`/items/inventories/${inventoryId}/items?_=${Date.now()}`),
+                api.get(`/inventories/${inventoryId}/access-level`).catch(() => ({ data: { role: "Viewer" } }))
+            ]);
+
+            setItems(itemsRes.data);
+            setUserRole(authRes.data.role);
+            setIsAuthenticated(true);
         } catch (err) {
             console.error("Fetch error:", err);
+            if (err.response?.status === 401) setIsAuthenticated(false);
         }
     }, [inventoryId]);
 
     useEffect(() => {
         const fetchData = async () => {
-            await loadItems();
+            await loadData();
         };
         fetchData();
-    }, [loadItems]);
+    }, [loadData]);
 
-    useEffect(() => {
-        api.get("/auth/me")
-            .then(() => setIsAuthenticated(true))
-            .catch(() => setIsAuthenticated(false));
-    }, []);
+    const canWrite = isAuthenticated && (userRole === "Owner" || userRole === "Editor");
 
     const handleSelect = (id) => {
+        if (!canWrite) return;
         setSelectedIds(prev =>
             prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
         );
     };
 
     const deleteSelected = async () => {
+        if (!canWrite) return;
         if (!window.confirm(`Delete ${selectedIds.length} items?`)) return;
 
         try {
@@ -47,79 +54,86 @@ export default function ItemsTab({ inventoryId }) {
                 await api.delete(`/items/${id}`);
             }
             setSelectedIds([]);
-            loadItems();
+            loadData();
         } catch (err) {
-            alert("Delete failed. Maybe you don't have write access?");
+            alert("Delete failed. Insufficient permissions.");
         }
     };
 
     const createItem = async (e) => {
         e.preventDefault();
-        if (!name.trim()) return;
+        if (!canWrite || !name.trim()) return;
         try {
-            const res = await api.post("/items", { inventoryId, name, description });
+            await api.post("/items", { inventoryId, name, description });
             setName("");
             setDescription("");
-            setItems(prevItems => [...prevItems, res.data]);
-            loadItems();
-        } catch (err)
-        {
-            console.error(err);
-            console.error("Server Error Details:", err.response?.data);
+            loadData();
+        } catch (err) {
+            console.error("Create failed:", err.response?.data);
         }
     };
 
     return (
         <div className="container-fluid py-3">
             <div className="d-flex justify-content-between align-items-center mb-3">
-                <h4>Items</h4>
-                {selectedIds.length > 0 && (
+                <h4 className="fw-bold">Items</h4>
+                {canWrite && selectedIds.length > 0 && (
                     <div className="animate__animated animate__fadeIn">
-                        <button className="btn btn-danger" onClick={deleteSelected}>
+                        <button className="btn btn-danger shadow-sm" onClick={deleteSelected}>
                             Delete Selected ({selectedIds.length})
                         </button>
                     </div>
                 )}
             </div>
 
-            <form className="row g-2 mb-4 p-3 bg-light rounded border" onSubmit={createItem}>
-                <div className="col-md-4">
-                    <input className="form-control" placeholder="Item Name" value={name} onChange={e => setName(e.target.value)} />
-                </div>
-                <div className="col-md-6">
-                    <input className="form-control" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
-                </div>
-                <div className="col-md-2">
-                    <button className="btn btn-success w-100" type="submit">Add</button>
-                </div>
-            </form>
+            {canWrite ? (
+                <form className="row g-2 mb-4 p-3 bg-light-subtle rounded border shadow-sm" onSubmit={createItem}>
+                    <div className="col-md-4">
+                        <input className="form-control" placeholder="Item Name" value={name} onChange={e => setName(e.target.value)} />
+                    </div>
+                    <div className="col-md-6">
+                        <input className="form-control" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
+                    </div>
+                    <div className="col-md-2">
+                        <button className="btn btn-success w-100 fw-bold" type="submit">Add Item</button>
+                    </div>
+                </form>
+            ) : (
+                !isAuthenticated && (
+                    <div className="alert alert-info small py-2 shadow-sm">
+                        Please <a href="/login">login</a> to add or manage items.
+                    </div>
+                )
+            )}
 
-            <div className="table-responsive shadow-sm rounded">
-                <table className={`table table-hover align-middle ${theme === 'dark' ? 'table-dark' : ''}`}>
-                    <thead className="table-secondary">
+            <div className="table-responsive shadow-sm rounded border">
+                <table className={`table table-hover align-middle mb-0 ${theme === 'dark' ? 'table-dark' : ''}`}>
+                    <thead className={theme === 'dark' ? 'table-dark' : 'table-light'}>
                         <tr>
-                            <th style={{ width: "40px" }}></th>
-                            <th>Custom ID</th>
-                            <th>Name</th>
-                            <th>Description</th>
-                            <th>Likes</th>
+                            {canWrite && <th style={{ width: "40px" }}></th>}
+                            <th className="small text-uppercase opacity-75">ID</th>
+                            <th className="small text-uppercase opacity-75">Name</th>
+                            <th className="small text-uppercase opacity-75">Description</th>
+                            <th className="small text-uppercase opacity-75 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {items.map(i => (
-                            <tr key={i.id} onClick={() => handleSelect(i.id)} style={{ cursor: "pointer" }}>
-                                <td>
-                                    <input
-                                        type="checkbox"
-                                        className="form-check-input"
-                                        checked={selectedIds.includes(i.id)}
-                                        onChange={() => { }}
-                                    />
-                                </td>
-                                <td className="font-monospace text-primary small">{i.customId || "GEN-001"}</td>
+                            <tr key={i.id} onClick={() => handleSelect(i.id)} style={{ cursor: canWrite ? "pointer" : "default" }}>
+                                {canWrite && (
+                                    <td>
+                                        <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            checked={selectedIds.includes(i.id)}
+                                            readOnly
+                                        />
+                                    </td>
+                                )}
+                                <td className="font-monospace text-primary small fw-bold">{i.customId}</td>
                                 <td className="fw-bold">{i.name}</td>
-                                <td className="text-truncate" style={{ maxWidth: "200px" }}>{i.description}</td>
-                                <td>
+                                <td className="text-muted small text-truncate" style={{ maxWidth: "300px" }}>{i.description}</td>
+                                <td className="text-center">
                                     <LikeButton
                                         itemId={i.id}
                                         initialLikes={i.likesCount || 0}
@@ -131,7 +145,11 @@ export default function ItemsTab({ inventoryId }) {
                         ))}
                     </tbody>
                 </table>
-                {items.length === 0 && <div className="p-5 text-center text-muted">No items in this inventory.</div>}
+                {items.length === 0 && (
+                    <div className="p-5 text-center text-muted border-top bg-light-subtle">
+                        No items found in this inventory.
+                    </div>
+                )}
             </div>
         </div>
     );

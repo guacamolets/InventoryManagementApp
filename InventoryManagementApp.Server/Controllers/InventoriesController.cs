@@ -131,13 +131,6 @@ public class InventoriesController : ControllerBase
         return NoContent();
     }
 
-    [HttpGet("{id}/access")]
-    [Authorize]
-    public async Task<IActionResult> GetAccessList(Guid id)
-    {
-        return Ok(await _service.GetAccessListAsync(id));
-    }
-
     [HttpPost("{id}")]
     [Authorize]
     public async Task<IActionResult> AddAccess(Guid id, [FromBody] InventoryAccessDto dto)
@@ -230,6 +223,15 @@ public class InventoriesController : ControllerBase
         var accessList = _service.GetAccessListAsync(id);
 
         return Ok(accessList);
+    }
+
+    [HttpGet("{id}/access-level")]
+    public async Task<IActionResult> GetAccessLevel(Guid id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+        var role = await _service.GetUserRoleAsync(id, userId, isAdmin);
+        return Ok(new { role });
     }
 
     [HttpGet("search")]
