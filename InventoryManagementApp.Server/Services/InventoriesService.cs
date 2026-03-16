@@ -132,19 +132,24 @@ public class InventoriesService
         return true;
     }
 
-    public async Task<bool> AddAccessAsync(Guid id, string userId, bool isAdmin, string targetUserId, bool canWrite)
+    public async Task<bool> AddAccessAsync(Guid id, string email, bool isAdmin, string currentUserId, bool canWrite)
     {
-        if (!await CanWriteAsync(id, userId, isAdmin))
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Email == email);
+
+        if (user == null) return false;
+
+        if (!await CanWriteAsync(id, currentUserId, isAdmin))
             return false;
 
-        if (await _context.InventoryAccesses.AnyAsync(a => a.InventoryId == id && a.UserId == targetUserId))
+        if (await _context.InventoryAccesses.AnyAsync(a => a.InventoryId == id && a.UserId == user.Id))
             return false;
 
         _context.InventoryAccesses.Add(new InventoryAccess
         {
             Id = Guid.NewGuid(),
             InventoryId = id,
-            UserId = targetUserId,
+            UserId = user.Id,
             CanWrite = canWrite
         });
 
@@ -170,6 +175,7 @@ public class InventoriesService
     public async Task<IEnumerable<InventoryAccess>> GetAccessListAsync(Guid inventoryId)
     {
         return await _context.InventoryAccesses
+            .Include(a => a.User)
             .Where(a => a.InventoryId == inventoryId)
             .AsNoTracking()
             .ToListAsync();

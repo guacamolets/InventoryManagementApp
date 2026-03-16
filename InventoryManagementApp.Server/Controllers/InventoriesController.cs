@@ -135,10 +135,10 @@ public class InventoriesController : ControllerBase
     [Authorize]
     public async Task<IActionResult> AddAccess(Guid id, [FromBody] InventoryAccessDto dto)
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var isAdmin = User.IsInRole("Admin");
 
-        var success = await _service.AddAccessAsync(id, dto.UserId, dto.CanWrite, userId!, isAdmin);
+        var success = await _service.AddAccessAsync(id, dto.Email, dto.CanWrite, currentUserId!, isAdmin);
 
         if (!success) 
             return Forbid();
@@ -209,18 +209,25 @@ public class InventoriesController : ControllerBase
             Name = t.Name,
             Count = t.Inventories.Count()
         })
-        .OrderByDescending(t => t.Count)
-        .Take(30));
+            .OrderByDescending(t => t.Count)
+            .Take(30));
     }
 
     [HttpGet("{id}/access")]
     public async Task<IActionResult> GetInventoryAccess(Guid id)
     {
-        var inventory = _service.GetByIdAsync(id);
+        var inventory = await _service.GetByIdAsync(id);
         if (inventory == null)
             return NotFound();
 
-        var accessList = _service.GetAccessListAsync(id);
+        var accessList = await _service.GetAccessListAsync(id);
+
+        var result = accessList.Select(a => new InventoryAccessDto
+        {
+            Email = a.User?.Email ?? (string.IsNullOrEmpty(a.UserId) ? "No User ID" : $"User {a.UserId} not loaded"),
+            CanWrite = a.CanWrite,
+            Id = a.Id
+        });
 
         return Ok(accessList);
     }

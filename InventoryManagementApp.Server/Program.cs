@@ -88,6 +88,20 @@ builder.Services.AddAuthentication(options =>
     options.SignInScheme = IdentityConstants.ExternalScheme;
 });
 
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+        return Task.CompletedTask;
+    };
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+        return Task.CompletedTask;
+    };
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
