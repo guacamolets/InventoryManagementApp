@@ -131,36 +131,6 @@ public class InventoriesController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("{id}")]
-    [Authorize]
-    public async Task<IActionResult> AddAccess(Guid id, [FromBody] InventoryAccessDto dto)
-    {
-        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isAdmin = User.IsInRole("Admin");
-
-        var success = await _service.AddAccessAsync(id, dto.Email, dto.CanWrite, currentUserId!, isAdmin);
-
-        if (!success) 
-            return Forbid();
-
-        return Ok();
-    }
-
-    [HttpDelete("{id}/{targetUserId}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> RemoveAccess(Guid id, string targetUserId)
-    {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        var isAdmin = User.IsInRole("Admin");
-
-        var success = await _service.RemoveAccessAsync(id, targetUserId, userId!, isAdmin);
-
-        if (!success) 
-            return Forbid();
-
-        return NoContent();
-    }
-
     [HttpGet("latest")]
     public async Task<IActionResult> GetLatest()
     {
@@ -213,6 +183,61 @@ public class InventoriesController : ControllerBase
             .Take(30));
     }
 
+    [HttpGet("tags")]
+    public async Task<IActionResult> GetTags()
+    {
+        var tags = await _service.GetAllTagNamesAsync();
+        return Ok(tags);
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string q)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return BadRequest("Query is empty");
+
+        var inventories = await _service.GetAllAsync();
+        var results = inventories
+            .Where(i =>
+                (!string.IsNullOrEmpty(i.Title) && i.Title.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
+                (!string.IsNullOrEmpty(i.Description) && i.Description.Contains(q, StringComparison.OrdinalIgnoreCase))
+            )
+            .Select(i => new { i.Id, i.Title, i.Description })
+            .ToList();
+
+        return Ok(results);
+    }
+
+    [HttpPost("{id}")]
+    [Authorize]
+    public async Task<IActionResult> AddAccess(Guid id, [FromBody] InventoryAccessDto dto)
+    {
+        var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+
+        var success = await _service.AddAccessAsync(id, dto.Email, dto.CanWrite, currentUserId!, isAdmin);
+
+        if (!success)
+            return Forbid();
+
+        return Ok();
+    }
+
+    [HttpDelete("{id}/{targetUserId}")]
+    [Authorize]
+    public async Task<IActionResult> RemoveAccess(Guid id, string targetUserId)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var isAdmin = User.IsInRole("Admin");
+
+        var success = await _service.RemoveAccessAsync(id, targetUserId, userId!, isAdmin);
+
+        if (!success)
+            return Forbid();
+
+        return NoContent();
+    }
+
     [HttpGet("{id}/access")]
     public async Task<IActionResult> GetInventoryAccess(Guid id)
     {
@@ -239,30 +264,5 @@ public class InventoriesController : ControllerBase
         var isAdmin = User.IsInRole("Admin");
         var role = await _service.GetUserRoleAsync(id, userId, isAdmin);
         return Ok(new { role });
-    }
-
-    [HttpGet("search")]
-    public async Task<IActionResult> Search([FromQuery] string q)
-    {
-        if (string.IsNullOrWhiteSpace(q))
-            return BadRequest("Query is empty");
-
-        var inventories = await _service.GetAllAsync();
-        var results = inventories
-            .Where(i =>
-                (!string.IsNullOrEmpty(i.Title) && i.Title.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-                (!string.IsNullOrEmpty(i.Description) && i.Description.Contains(q, StringComparison.OrdinalIgnoreCase))
-            )
-            .Select(i => new { i.Id, i.Title, i.Description })
-            .ToList();
-
-        return Ok(results);
-    }
-
-    [HttpGet("tags")]
-    public async Task<IActionResult> GetTags()
-    {
-        var tags = await _service.GetAllTagNamesAsync();
-        return Ok(tags);
     }
 }

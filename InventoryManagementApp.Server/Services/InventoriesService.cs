@@ -13,32 +13,17 @@ public class InventoriesService
         _context = context;
     }
 
-    public async Task<IEnumerable<Inventory>> GetAllAsync()
+    public async Task<IEnumerable<Inventory>> GetAllAsync(ClaimsPrincipal? user = null)
     {
-        return await _context.Inventories
-             .AsNoTracking()
-             .ToListAsync();
-    }
+        var query = _context.Inventories.Include(i => i.Tags).AsNoTracking();
 
-    public async Task<IEnumerable<Inventory>> GetAllAsync(ClaimsPrincipal user)
-    {
-        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
-
-        var isAdmin = user.IsInRole("Admin");
-
-        if (isAdmin)
+        if (user != null && !user.IsInRole("Admin"))
         {
-            return await _context.Inventories
-                .Include(i => i.Tags)
-                .AsNoTracking()
-                .ToListAsync();
+            var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            query = query.Where(i => i.OwnerId == userId);
         }
 
-        return await _context.Inventories
-            .Where(i => i.OwnerId == userId)
-            .Include(i => i.Tags)
-            .AsNoTracking()
-            .ToListAsync();
+        return await query.ToListAsync();
     }
 
     public async Task<Inventory?> GetByIdAsync(Guid id)
@@ -89,25 +74,22 @@ public class InventoriesService
             return null;
 
         _context.Entry(inventory).Property(i => i.RowVersion).OriginalValue = updated.RowVersion;
-
-        inventory.Title = updated.Title;
-        inventory.Description = updated.Description;
-        inventory.Category = updated.Category;
-        inventory.CustomIdTemplate = updated.CustomIdTemplate;
-        inventory.IsPublic = updated.IsPublic;
-        inventory.ImageUrl = updated.ImageUrl;
+        _context.Entry(inventory).CurrentValues.SetValues(updated);
 
         inventory.Tags.Clear();
         if (tagNames != null && tagNames.Any())
         {
+            var existingTags = await _context.Tags
+                .Where(t => tagNames.Contains(t.Name))
+                .ToListAsync();
+
             foreach (var name in tagNames)
             {
-                var tag = await _context.Tags.FirstOrDefaultAsync(t => t.Name == name);
+                var tag = existingTags.FirstOrDefault(t => t.Name == name);
                 if (tag == null)
                 {
                     tag = new Tag { Id = Guid.NewGuid(), Name = name };
                     _context.Tags.Add(tag);
-                    await _context.SaveChangesAsync();
                 }
                 inventory.Tags.Add(tag);
             }
@@ -185,19 +167,19 @@ public class InventoriesService
     {
         if (isAdmin) return "Owner";
 
-        var inventory = await _context.Inventories
-            .AsNoTracking()
-            .Select(i => new { i.Id, i.OwnerId })
-            .FirstOrDefaultAsync(i => i.Id == inventoryId);
+        var accessInfo = await _context.Inventories
+            .Where(i => i.Id == inventoryId)
+            .Select(i => new
+            {
+                i.OwnerId,
+                UserAccess = _context.InventoryAccesses
+                    .FirstOrDefault(a => a.InventoryId == inventoryId && a.UserId == userId)
+            })
+            .FirstOrDefaultAsync();
 
-        if (inventory == null) return "Viewer";
-        if (inventory.OwnerId == userId) return "Owner";
-
-        var access = await _context.InventoryAccesses
-            .AsNoTracking()
-            .FirstOrDefaultAsync(a => a.InventoryId == inventoryId && a.UserId == userId);
-
-        if (access != null) return access.CanWrite ? "Editor" : "Viewer";
+        if (accessInfo == null) return "Viewer";
+        if (accessInfo.OwnerId == userId) return "Owner";
+        if (accessInfo.UserAccess != null) return accessInfo.UserAccess.CanWrite ? "Editor" : "Viewer";
 
         return "Viewer";
     }

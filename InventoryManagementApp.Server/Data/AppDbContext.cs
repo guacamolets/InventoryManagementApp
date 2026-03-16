@@ -17,60 +17,60 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<Item>()
-            .HasIndex(i => new { i.InventoryId, i.CustomId })
-            .IsUnique();
+        builder.Entity<Inventory>(entity =>
+        {
+            entity.HasOne(inv => inv.Owner)
+                .WithMany()
+                .HasForeignKey(inv => inv.OwnerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-        builder.Entity<InventoryAccess>()
-            .HasOne(a => a.Inventory)
-            .WithMany()
-            .HasForeignKey(a => a.InventoryId)
-            .OnDelete(DeleteBehavior.Restrict);
+            entity.Property(p => p.RowVersion)
+                .IsRowVersion();
 
-        builder.Entity<Inventory>()
-            .HasOne(inv => inv.Owner)
-            .WithMany()
-            .HasForeignKey(inv => inv.OwnerId)
-            .OnDelete(DeleteBehavior.Restrict);
+            entity.HasMany(i => i.Tags)
+                .WithMany(t => t.Inventories)
+                .UsingEntity(j => j.ToTable("InventoryTags"));
+        });
 
-        builder.Entity<Inventory>()
-            .Property(p => p.RowVersion)
-            .IsRowVersion()
-            .HasColumnName("RowVersion");
+        builder.Entity<Item>(entity =>
+        {
+            entity.HasIndex(i => new { i.InventoryId, i.CustomId })
+                .IsUnique();
 
-        builder.Entity<Item>()
-            .Property(p => p.RowVersion)
-            .IsRowVersion()
-            .HasColumnName("RowVersion");
+            entity.Property(p => p.RowVersion)
+                .IsRowVersion();
 
-        builder.Entity<Inventory>()
-            .HasMany(i => i.Tags)
-            .WithMany(t => t.Inventories);
+            entity.HasOne(i => i.Inventory)
+                .WithMany(inv => inv.Items)
+                .HasForeignKey(i => i.InventoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        builder.Entity<InventoryAccess>(entity =>
+        {
+            entity.HasOne(a => a.Inventory)
+                .WithMany()
+                .HasForeignKey(a => a.InventoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
 
         builder.Entity<Tag>()
             .HasIndex(t => t.Name)
-            .IsUnique();
-
-        builder.Entity<Item>()
-            .HasIndex(i => new { i.InventoryId, i.CustomId })
             .IsUnique();
 
         builder.Entity<ItemLike>(entity =>
         {
             entity.HasKey(l => new { l.ItemId, l.UserId });
 
-            entity.Property(l => l.UserId)
-                  .HasMaxLength(450);
-
             entity.HasOne(l => l.Item)
-                  .WithMany(i => i.Likes)
-                  .HasForeignKey(l => l.ItemId)
-                  .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(i => i.Likes)
+                .HasForeignKey(l => l.ItemId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(l => l.User)
-                  .WithMany()
-                  .HasForeignKey(l => l.UserId)
-                  .OnDelete(DeleteBehavior.NoAction);
+                .WithMany()
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
     }
 }

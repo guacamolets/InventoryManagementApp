@@ -25,14 +25,7 @@ public class DiscussionsController : ControllerBase
             .Where(p => p.InventoryId == inventoryId)
             .Include(p => p.User)
             .OrderBy(p => p.CreatedAt)
-            .Select(p => new
-            {
-                p.Id,
-                p.Text,
-                p.CreatedAt,
-                p.UserId,
-                UserName = p.User.UserName
-            })
+            .Select(p => new { p.Id, p.Text, p.CreatedAt, p.UserId, UserName = p.User.UserName })
             .ToListAsync();
 
         return Ok(posts);
