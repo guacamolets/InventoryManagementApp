@@ -21,6 +21,13 @@ builder.Services.AddScoped<ItemsService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AdminService>();
 
+builder.Services.AddHttpClient<SalesforceService>(client =>
+{
+    var sfUrl = builder.Configuration["Salesforce:BaseUrl"];
+    client.BaseAddress = new Uri(sfUrl);
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
+
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();

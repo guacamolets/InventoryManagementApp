@@ -2,11 +2,13 @@ import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import api from "../api/api";
 import SortableTable from "../components/SortableTable";
+import SalesforceSync from "../components/SalesforceSync";
 
 export default function UserPage() {
     const { t } = useTranslation();
     const [owned, setOwned] = useState([]);
     const [writable, setWritable] = useState([]);
+    const [isSfModalOpen, setIsSfModalOpen] = useState(false);
 
     const loadData = useCallback(async () => {
         try {
@@ -53,15 +55,29 @@ export default function UserPage() {
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h3 className="fw-bold">{t("userPage.myInventories")}</h3>
-                <button className="btn btn-primary shadow-sm" onClick={handleCreate}>
-                    {t("userPage.createBtn")}
-                </button>
+                <div>
+                    <button
+                        className="btn btn-outline-cloud secondary shadow-sm me-2"
+                        style={{ borderColor: '#00a1e0', color: '#00a1e0' }}
+                        onClick={() => setIsSfModalOpen(true)}
+                    >
+                        <i className="bi bi-cloud-upload me-1"></i> CRM Sync
+                    </button>
+
+                    <button className="btn btn-primary shadow-sm" onClick={handleCreate}>
+                        {t("userPage.createBtn")}
+                    </button>
+                </div>
             </div>
 
             <SortableTable data={owned} onDelete={handleDelete} isOwner={true}/>
 
             <h3 className="mt-5 mb-4 fw-bold">{t("userPage.sharedInventories")}</h3>
             <SortableTable data={writable} isOwner={false} />
+
+            {isSfModalOpen && (
+                <SalesforceSync onClose={() => setIsSfModalOpen(false)} />
+            )}
         </div>
     );
 }

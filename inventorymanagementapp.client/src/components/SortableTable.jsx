@@ -83,7 +83,7 @@ export default function SortableTable({ data, onDelete, isOwner }) {
                         <tr>
                             {isOwner && <th style={{ width: '40px' }} className="px-3"></th>}
                             <th className="small text-uppercase fw-bold opacity-75" style={{ cursor: "pointer" }} onClick={() => handleSort("title")}>
-                                {t("table.columnTitle")} {sort.column === "title" && (sort.asc ? " ▲" : " ▼")}
+                                {t("table.columnTitle")} {sort.column === "title" ? (sort.asc ? "▲" : "▼") : "⇅"}
                             </th>
                             <th className="small text-uppercase fw-bold opacity-75" style={{ cursor: "pointer" }} onClick={() => handleSort("description")}>
                                 {t("table.columnDescription")} {sort.column === "description" ? (sort.asc ? "▲" : "▼") : "⇅"}
