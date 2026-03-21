@@ -21,4 +21,5 @@ public class Inventory
 
     public string? CustomIdTemplate { get; set; }
     public int LastSequenceNumber { get; set; } = 0;
+    public string? ApiToken { get; set; }
 }
