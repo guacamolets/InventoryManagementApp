@@ -215,4 +215,18 @@ public class InventoriesService
             .Distinct()
             .ToListAsync();
     }
+
+    public async Task<string?> GenerateTokenAsync(Guid id)
+    {
+        var inventory = await _context.Inventories.FindAsync(id);
+        if (inventory == null) return null;
+
+        if (string.IsNullOrEmpty(inventory.ApiToken))
+        {
+            inventory.ApiToken = Guid.NewGuid().ToString("N");
+            await _context.SaveChangesAsync();
+        }
+
+        return inventory.ApiToken;
+    }
 }

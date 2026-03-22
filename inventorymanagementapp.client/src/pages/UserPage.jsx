@@ -51,6 +51,18 @@ export default function UserPage() {
         loadData();
     };
 
+    const handleCopyToken = async (inventoryId) => {
+        try {
+            const response = await api.post(`/inventories/${inventoryId}/generate-token`);
+            const token = response.data.token;
+
+            await navigator.clipboard.writeText(token);
+            alert("The token has been copied to your clipboard! Paste it into Odoo.");
+        } catch (err) {
+            alert("Error generating token");
+        }
+    };
+
     return (
         <div className="container mt-4">
             <div className="d-flex justify-content-between align-items-center mb-4">
@@ -70,7 +82,7 @@ export default function UserPage() {
                 </div>
             </div>
 
-            <SortableTable data={owned} onDelete={handleDelete} isOwner={true}/>
+            <SortableTable data={owned} onDelete={handleDelete} handleCopyToken={handleCopyToken} isOwner={true}/>
 
             <h3 className="mt-5 mb-4 fw-bold">{t("userPage.sharedInventories")}</h3>
             <SortableTable data={writable} isOwner={false} />

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
@@ -9,11 +10,15 @@ public class ExternalApiController : ControllerBase
 
     public ExternalApiController(AppDbContext context) => _context = context;
 
+    [AllowAnonymous]
     [HttpGet("aggregate/{token}")]
     public async Task<IActionResult> GetAggregatedData(string token)
     {
         var inventory = await _context.Inventories
             .Include(i => i.Items)
+                .ThenInclude(item => item.Likes)
+            .Include(i => i.Items)
+                .ThenInclude(item => item.CreatedBy)
             .FirstOrDefaultAsync(i => i.ApiToken == token);
 
         if (inventory == null) return Unauthorized();

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/theme/useTheme";
 import { useTranslation } from "react-i18next";
 
-export default function SortableTable({ data, onDelete, isOwner }) {
+export default function SortableTable({ data, onDelete, handleCopyToken, isOwner }) {
     const { t } = useTranslation();
     const [filter, setFilter] = useState("");
     const [sort, setSort] = useState({ column: null, asc: true });
@@ -67,10 +67,10 @@ export default function SortableTable({ data, onDelete, isOwner }) {
 
                 {isOwner && selectedIds.length > 0 && (
                     <div className="animate__animated animate__fadeIn">
-                        <button
-                            className="btn btn-danger btn-sm px-4 rounded-pill fw-bold shadow-sm"
-                            onClick={handleBulkDelete}
-                        >
+                        <button className="btn btn-outline-cloud secondary shadow-sm me-2" style={{ borderColor: '#00a1e0', color: '#00a1e0' }} disabled={selectedIds.length !== 1} onClick={() => handleCopyToken(selectedIds[0])}>
+                            <i className="bi bi-key-fill"></i> Get API Token
+                        </button>
+                        <button className="btn btn-danger btn-sm px-4 rounded-pill fw-bold shadow-sm" onClick={handleBulkDelete}>
                             {t("table.deleteBtn")} ({selectedIds.length})
                         </button>
                     </div>

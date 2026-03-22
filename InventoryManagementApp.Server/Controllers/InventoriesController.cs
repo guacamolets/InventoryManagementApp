@@ -265,4 +265,12 @@ public class InventoriesController : ControllerBase
         var role = await _service.GetUserRoleAsync(id, userId, isAdmin);
         return Ok(new { role });
     }
+
+    [HttpPost("{id}/generate-token")]
+    public async Task<IActionResult> GenerateToken(Guid id)
+    {
+        var token = await _service.GenerateTokenAsync(id);
+        if (token == null) return NotFound();
+        return Ok(new { token });
+    }
 }
