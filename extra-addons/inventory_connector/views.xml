@@ -1,23 +1,57 @@
-<record id="view_external_inventory_form" model="ir.ui.view">
-    <field name="name">external.inventory.form</field>
-    <field name="model">external.inventory</field>
-    <field name="arch" type="xml">
-        <form>
-            <header>
-                <button name="action_import_from_api" string="Импортировать данные" type="object" class="btn-primary"/>
-            </header>
-            <sheet>
-                <group>
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_external_inventory_form" model="ir.ui.view">
+            <field name="name">external.inventory.form</field>
+            <field name="model">external.inventory</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button name="action_import_from_api" string="Import from Azure" type="object" class="btn-primary"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <field name="name"/>
+                            <field name="api_token"/>
+                        </group>
+                        <group string="Data from C# API">
+                            <field name="oldest_item"/>
+                            <field name="total_likes"/>
+                            <field name="avg_likes"/>
+                            <field name="top_contributor"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_external_inventory_tree" model="ir.ui.view">
+            <field name="name">external.inventory.tree</field>
+            <field name="model">external.inventory</field>
+            <field name="arch" type="xml">
+                <tree>
                     <field name="name"/>
-                    <field name="api_token"/>
-                </group>
-                <group string="Aggregated Data (Read Only)">
-                    <field name="oldest_item"/>
                     <field name="total_likes"/>
-                    <field name="avg_likes"/>
                     <field name="top_contributor"/>
-                </group>
-            </sheet>
-        </form>
-    </field>
-</record>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_external_inventory" model="ir.actions.act_window">
+            <field name="name">External inventories</field>
+            <field name="res_model">external.inventory</field>
+            <field name="view_mode">tree,form</field>
+            <field name="target">current</field>
+        </record>
+
+        <menuitem id="menu_external_inventory_root"
+                  name="C# Integration"
+                  sequence="10"/>
+
+        <menuitem id="menu_external_inventory_main"
+                  name="Synchronization"
+                  parent="menu_external_inventory_root"
+                  action="action_external_inventory"
+                  sequence="10"/>
+    </data>
+</odoo>
