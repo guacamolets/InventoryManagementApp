@@ -30,7 +30,10 @@
     "edit": "Edit",
     "loading": "Loading...",
     "actions": "Actions",
-    "search": "Search..."
+    "search": "Search...",
+    "submit": "Submit",
+    "sending": "Sending...",
+    "connection_error": "Connection error"
   },
   "categories": {
     "general": "General",
@@ -181,5 +184,29 @@
     "confirmDelete": "Delete this user?",
     "selected": "Selected",
     "clearSelection": "Clear"
+  },
+  "support": {
+    "help_btn": "Help",
+    "title": "Create Support Ticket",
+    "priority": "Priority",
+    "priority_high": "High",
+    "priority_average": "Average",
+    "priority_low": "Low",
+    "summary": "Summary",
+    "summary_placeholder": "Describe your problem...",
+    "success_alert": "Ticket submitted successfully!",
+    "error_alert": "Failed to submit ticket."
+  },
+  "crm": {
+    "link_profile_btn": "Link your profile to CRM",
+    "title": "Additional Information",
+    "company": "Company",
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "email": "Email",
+    "sync_btn": "Sync to Salesforce",
+    "success_alert": "Successfully synced with Salesforce",
+    "error_prefix": "Error: ",
+    "error_default": "Failed to sync"
   }
 }

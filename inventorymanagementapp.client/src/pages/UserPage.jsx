@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import api from "../api/api";
 import SortableTable from "../components/SortableTable";
-import SalesforceModal from "../components/SalesforceModal";
+import SalesforceModal from "../components/integrations/SalesforceModal";
 
 export default function UserPage() {
     const { t } = useTranslation();

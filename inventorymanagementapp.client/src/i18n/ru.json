@@ -30,7 +30,10 @@
     "edit": "Изменить",
     "loading": "Загрузка...",
     "actions": "Действия",
-    "search": "Поиск..."
+    "search": "Поиск...",
+    "submit": "Отправить",
+    "sending": "Отправка...",
+    "connection_error": "Ошибка соединения"
   },
   "categories": {
     "general": "Общее",
@@ -181,5 +184,29 @@
     "confirmDelete": "Удалить этого пользователя?",
     "selected": "Выбрано",
     "clearSelection": "Сбросить"
+  },
+  "support": {
+    "help_btn": "Помощь",
+    "title": "Создать тикет",
+    "priority": "Приоритет",
+    "priority_high": "Высокий",
+    "priority_average": "Средний",
+    "priority_low": "Низкий",
+    "summary": "Описание",
+    "summary_placeholder": "Опишите вашу проблему...",
+    "success_alert": "Тикет успешно отправлен!",
+    "error_alert": "Не удалось отправить тикет."
+  },
+  "crm": {
+    "link_profile_btn": "Связать профиль с CRM",
+    "title": "Дополнительная информация",
+    "company": "Компания",
+    "first_name": "Имя",
+    "last_name": "Фамилия",
+    "email": "Email",
+    "sync_btn": "Синхронизировать",
+    "success_alert": "Профиль успешно синхронизирован с Salesforce",
+    "error_prefix": "Ошибка: ",
+    "error_default": "Не удалось выполнить синхронизацию"
   }
 }
