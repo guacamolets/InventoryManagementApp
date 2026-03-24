@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from "react-i18next";
+import { toast } from 'react-toastify';
 
 const SalesforceModal = () => {
     const { t } = useTranslation();
@@ -20,15 +21,15 @@ const SalesforceModal = () => {
             });
 
             if (response.ok) {
-                alert(t('crm.success_alert'));
+                toast.success(t('crm.success_alert'));
                 setIsOpen(false);
                 setFormData({ companyName: '', firstName: '', lastName: '', email: '' });
             } else {
                 const err = await response.json();
-                alert(t('crm.error_prefix') + (err.message || t('crm.error_default')));
+                toast.error(t('crm.error_prefix') + (err.message || t('crm.error_default')));
             }
         } catch (error) {
-            alert(t('common.connection_error'));
+            toast.error(t('common.connection_error'));
         } finally {
             setLoading(false);
         }

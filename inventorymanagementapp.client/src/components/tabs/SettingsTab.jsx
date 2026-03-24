@@ -4,6 +4,7 @@ import CreatableSelect from "react-select/creatable";
 import api from "../../api/api";
 import CustomIdConstructor from "../CustomIdConstructor";
 import { useTranslation } from "react-i18next";
+import { toast } from 'react-toastify';
 
 export default function SettingsTab({ inventory, onUpdate }) {
     const { t } = useTranslation();
@@ -117,7 +118,7 @@ export default function SettingsTab({ inventory, onUpdate }) {
             setIsDirty(false);
             setLastSaved(new Date().toLocaleTimeString());
         } catch (err) {
-            if (err.response?.status === 409 && !isAuto) alert(t("settings.conflictError"));
+            if (err.response?.status === 409 && !isAuto) toast.error(t("settings.conflictError"));
         } finally { setIsSaving(false); }
     }, [inventory, isDirty, isSaving, onUpdate, t]);
 
@@ -245,7 +246,7 @@ export default function SettingsTab({ inventory, onUpdate }) {
                                     <button className="btn btn-primary" onClick={async () => {
                                         setIsAddingAccess(true);
                                         try { await api.post(`/inventories/${inventory.id}`, { email: newUserEmail }); setNewUserEmail(""); loadData(); }
-                                        catch { alert("User not found"); } finally { setIsAddingAccess(false); }
+                                        catch { toast.error("User not found"); } finally { setIsAddingAccess(false); }
                                     }} disabled={isAddingAccess}>{isAddingAccess ? "..." : "+"}</button>
                                 </div>
                             </div>

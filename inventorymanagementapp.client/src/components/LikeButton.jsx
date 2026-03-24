@@ -1,4 +1,5 @@
 ﻿import { useState } from "react";
+import { toast } from 'react-toastify';
 import api from "../api/api";
 import { Heart, HeartFill } from "react-bootstrap-icons";
 
@@ -11,7 +12,7 @@ export default function LikeButton({ itemId, initialLikes, initialIsLiked, isAut
         e.stopPropagation();
 
         if (!isAuthenticated) {
-            alert("Please login to like items!");
+            toast.error("Please login to like items!");
             return;
         }
 

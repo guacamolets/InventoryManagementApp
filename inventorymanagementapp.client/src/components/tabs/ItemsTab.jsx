@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from 'react-toastify';
 import api from "../../api/api";
 import { useTheme } from "../../context/theme/useTheme";
 import LikeButton from "../LikeButton";
@@ -55,7 +56,7 @@ export default function ItemsTab({ inventoryId }) {
             setSelectedIds([]);
             loadData();
         } catch (err) {
-            alert(t("items.deleteError"));
+            toast.error(t("items.deleteError"));
         }
     };
 

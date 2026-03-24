@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from "react-i18next";
+import { toast } from 'react-toastify';
 
 const SupportTicketModal = () => {
     const { t } = useTranslation();
@@ -28,11 +29,11 @@ const SupportTicketModal = () => {
             });
 
             if (response.ok) {
-                alert(t('support.success_alert'));
+                toast.success(t('support.success_alert'));
                 setIsOpen(false);
                 setSummary('');
             } else {
-                alert(t('support.error_alert'));
+                toast.error(t('support.error_alert'));
             }
         } catch (error) {
             console.error('Error:', error);

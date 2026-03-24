@@ -5,6 +5,7 @@ import ItemsTab from "../components/tabs/ItemsTab";
 import DiscussionTab from "../components/tabs/DiscussionTab";
 import SettingsTab from "../components/tabs/SettingsTab";
 import { useTranslation } from "react-i18next";
+import { toast } from 'react-toastify';
 
 export default function InventoryPage() {
     const { t } = useTranslation();
@@ -18,7 +19,7 @@ export default function InventoryPage() {
                 setInventory(res.data);
             } catch (err) {
                 console.error(err);
-                alert(t("inventory.loadError"));
+                toast.error(t("inventory.loadError"));
             }
         }
         load();

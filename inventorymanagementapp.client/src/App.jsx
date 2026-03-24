@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import AdminPage from "./pages/AdminPage";
@@ -19,8 +21,9 @@ function App() {
         <Route path="/profile" element={<UserPage />} />
         <Route path="/inventories/:id" element={<InventoryPage />} />
         <Route path="/search" element={<SearchPage />} />
-          </Routes>
-          <SupportTicketModal />
+      </Routes>
+      <SupportTicketModal />
+      <ToastContainer position="bottom-right" theme="colored" />
     </BrowserRouter>
   );
 }

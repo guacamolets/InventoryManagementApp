@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from 'react-toastify';
 import api from "../api/api";
 import SortableTable from "../components/SortableTable";
 import SalesforceModal from "../components/integrations/SalesforceModal";
@@ -40,7 +41,7 @@ export default function UserPage() {
             });
             loadData();
         } catch (err) {
-            alert(t("userPage.createError"));
+            toast.error(t("userPage.createError"));
         }
     };
 
@@ -57,9 +58,9 @@ export default function UserPage() {
             const token = response.data.token;
 
             await navigator.clipboard.writeText(token);
-            alert("The token has been copied to your clipboard! Paste it into Odoo.");
+            toast.success("The token has been copied to your clipboard! Paste it into Odoo.");
         } catch (err) {
-            alert("Error generating token");
+            toast.error("Error generating token");
         }
     };
 
