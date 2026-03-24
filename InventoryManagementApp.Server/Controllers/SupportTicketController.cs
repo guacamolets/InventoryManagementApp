@@ -18,12 +18,26 @@ public class SupportTicketController : ControllerBase
     }
 
     [Authorize]
-    [Authorize]
     [HttpPost("submit")]
     public async Task<IActionResult> SubmitTicket([FromBody] SupportTicketRequest request)
     {
         try
         {
+            using var authClient = new HttpClient();
+            var authParams = new Dictionary<string, string>
+            {
+                { "grant_type", "refresh_token" },
+                { "refresh_token", _config["Dropbox:RefreshToken"] },
+                { "client_id", _config["Dropbox:AppKey"] },
+                { "client_secret", _config["Dropbox:AppSecret"] }
+            };
+
+            var authResponse = await authClient.PostAsync("https://api.dropbox.com/oauth2/token", new FormUrlEncodedContent(authParams));
+            var authContent = await authResponse.Content.ReadAsStringAsync();
+
+            using var authJson = JsonDocument.Parse(authContent);
+            string currentAccessToken = authJson.RootElement.GetProperty("access_token").GetString();
+
             var ticketData = new
             {
                 Reported_by = User.Identity?.Name ?? "Authenticated User",
@@ -31,15 +45,14 @@ public class SupportTicketController : ControllerBase
                 Link = request.CurrentPageUrl,
                 Priority = request.Priority,
                 Summary = request.Summary,
-                Admin_Emails = new[] { "admin@yourdomain.com" }
+                Admin_Emails = new[] { "admin@belousovachristinegmail.onmicrosoft.com" }
             };
 
             string jsonString = JsonSerializer.Serialize(ticketData, new JsonSerializerOptions { WriteIndented = true });
             string fileName = $"ticket_{DateTime.UtcNow:yyyyMMdd_HHmmss}.json";
-            string dropboxToken = _config["Dropbox:AccessToken"];
 
             using var client = new HttpClient();
-            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {dropboxToken}");
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {currentAccessToken}");
 
             var dropboxArgs = JsonSerializer.Serialize(new
             {
@@ -51,7 +64,6 @@ public class SupportTicketController : ControllerBase
 
             var byteArray = Encoding.UTF8.GetBytes(jsonString);
             using var content = new ByteArrayContent(byteArray);
-
             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
             content.Headers.Add("Dropbox-API-Arg", dropboxArgs);
 

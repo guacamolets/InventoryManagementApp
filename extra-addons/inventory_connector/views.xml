@@ -7,18 +7,41 @@
             <field name="arch" type="xml">
                 <form>
                     <header>
-                        <button name="action_import_from_api" string="Import from Azure" type="object" class="btn-primary"/>
+                        <button name="action_import_from_api" string="Import from Azure" type="object" class="btn-primary" icon="fa-refresh"/>
+                        <span class="oe_read_only" style="margin-left: 10px;">
+                            Last Sync: <field name="sync_date"/>
+                        </span>
                     </header>
                     <sheet>
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Sync to see title..."/>
+                            </h1>
+                        </div>
                         <group>
-                            <field name="name"/>
-                            <field name="api_token"/>
+                            <group string="Configuration">
+                                <field name="api_token" password="True"/>
+                                <field name="category"/>
+                                <field name="tags"/>
+                                <field name="creator"/>
+                                <field name="is_public" widget="boolean_toggle"/>
+                            </group>
+                            <group string="Statistics">
+                                <field name="total_items"/>
+                                <field name="total_likes"/>
+                                <field name="avg_likes"/>
+                                <field name="top_contributor"/>
+                            </group>
                         </group>
-                        <group string="Data from C# API">
-                            <field name="oldest_item"/>
-                            <field name="total_likes"/>
-                            <field name="avg_likes"/>
-                            <field name="top_contributor"/>
+                        <group>
+                            <group string="Highlights">
+                                <field name="most_popular_item"/>
+                                <field name="last_added_item"/>
+                                <field name="oldest_item"/>
+                            </group>
+                            <group string="Description">
+                                <field name="description" nolabel="1" placeholder="Detailed description..." colspan="2"/>
+                            </group>
                         </group>
                     </sheet>
                 </form>
@@ -29,10 +52,12 @@
             <field name="name">external.inventory.tree</field>
             <field name="model">external.inventory</field>
             <field name="arch" type="xml">
-                <tree>
-                    <field name="name"/>
-                    <field name="total_likes"/>
-                    <field name="top_contributor"/>
+                <tree sample="1">
+                    <field name="name" string="Inventory Name"/>
+                    <field name="description" string="Description"/>
+                    <field name="creator" string="Owner"/>
+                    <field name="category"/>
+                    <field name="total_items" sum="Total Items"/>
                 </tree>
             </field>
         </record>
@@ -41,17 +66,9 @@
             <field name="name">External inventories</field>
             <field name="res_model">external.inventory</field>
             <field name="view_mode">tree,form</field>
-            <field name="target">current</field>
         </record>
 
-        <menuitem id="menu_external_inventory_root"
-                  name="C# Integration"
-                  sequence="10"/>
-
-        <menuitem id="menu_external_inventory_main"
-                  name="Synchronization"
-                  parent="menu_external_inventory_root"
-                  action="action_external_inventory"
-                  sequence="10"/>
+        <menuitem id="menu_external_inventory_root" name="C# Integration" sequence="10"/>
+        <menuitem id="menu_external_inventory_main" name="Synchronization" parent="menu_external_inventory_root" action="action_external_inventory" sequence="10"/>
     </data>
 </odoo>

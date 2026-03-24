@@ -48,7 +48,9 @@ public static class SeedData
         var furnitureTag = new Tag { Name = "Furniture" };
         var softwareTag = new Tag { Name = "Software" };
         var stationeryTag = new Tag { Name = "Stationery" };
-        context.Tags.AddRange(electronicsTag, booksTag, furnitureTag, softwareTag, stationeryTag);
+        var gamingTag = new Tag { Name = "Gaming" };
+        var retroTag = new Tag { Name = "Retro" };
+        context.Tags.AddRange(electronicsTag, booksTag, furnitureTag, softwareTag, stationeryTag, gamingTag, retroTag);
 
         var inventory1 = new Inventory
         {
@@ -96,7 +98,18 @@ public static class SeedData
             Tags = new List<Tag> { stationeryTag }
         };
 
-        context.Inventories.AddRange(inventory1, inventory2, inventory3, inventory4);
+        var inventory5 = new Inventory
+        {
+            Id = Guid.NewGuid(),
+            Title = "Retro Console Games",
+            Description = "A curated list of 90s console games. Focus on RPGs and platformers.",
+            OwnerId = admin.Id,
+            IsPublic = false,
+            Category = "Entertainment",
+            Tags = new List<Tag> { gamingTag, retroTag }
+        };
+
+        context.Inventories.AddRange(inventory1, inventory2, inventory3, inventory4, inventory5);
 
         var items = new List<Item>
         {
@@ -105,7 +118,9 @@ public static class SeedData
             new Item { Id = Guid.NewGuid(), InventoryId = inventory2.Id, Name = "C# in Depth", Description = "Fourth edition by Jon Skeet", CreatedById = user.Id, CustomId = "B-0001", CreatedAt = DateTime.UtcNow.AddDays(-10) },
             new Item { Id = Guid.NewGuid(), InventoryId = inventory2.Id, Name = "Clean Code", Description = "A Handbook of Agile Software Craftsmanship", CreatedById = user.Id, CustomId = "B-0002", CreatedAt = DateTime.UtcNow.AddDays(-9) },
             new Item { Id = Guid.NewGuid(), InventoryId = inventory3.Id, Name = "Coffee Machine", Description = "DeLonghi Magnifica S", CreatedById = admin.Id, CustomId = "KIT-a1b2c3d4", CreatedAt = DateTime.UtcNow.AddDays(-1) },
-            new Item { Id = Guid.NewGuid(), InventoryId = inventory3.Id, Name = "Microwave Ovens", Description = "Samsung Solo Microwave", CreatedById = admin.Id, CustomId = "KIT-e5f6g7h8", CreatedAt = DateTime.UtcNow }
+            new Item { Id = Guid.NewGuid(), InventoryId = inventory3.Id, Name = "Microwave Ovens", Description = "Samsung Solo Microwave", CreatedById = admin.Id, CustomId = "KIT-e5f6g7h8", CreatedAt = DateTime.UtcNow },
+            new Item { Id = Guid.NewGuid(), InventoryId = inventory5.Id, Name = "The Legend of Zelda", Description = "Action-adventure", CreatedById = admin.Id, CustomId = "KIT-e5fjg0h8", CreatedAt = DateTime.UtcNow },
+            new Item { Id = Guid.NewGuid(), InventoryId = inventory5.Id, Name = "Super Mario World", Description = "Platformer", CreatedById = admin.Id, CustomId = "KIT-rtfjg0h8", CreatedAt = DateTime.UtcNow }
         };
 
         context.Items.AddRange(items);

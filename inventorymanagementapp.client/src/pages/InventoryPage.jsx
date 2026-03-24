@@ -6,6 +6,7 @@ import DiscussionTab from "../components/tabs/DiscussionTab";
 import SettingsTab from "../components/tabs/SettingsTab";
 import { useTranslation } from "react-i18next";
 import { toast } from 'react-toastify';
+import { Helmet } from "react-helmet";
 
 export default function InventoryPage() {
     const { t } = useTranslation();
@@ -45,6 +46,10 @@ export default function InventoryPage() {
 
     return (
         <div className="container mt-4">
+            <Helmet>
+                <title>{inventory.title}</title>
+            </Helmet>
+
             <h2 className="fw-bold">{inventory.title}</h2>
             <p style={{ color: 'var(--text)', opacity: 0.7, lineHeight: '1.5' }} className="mb-0">
                 {inventory.description}

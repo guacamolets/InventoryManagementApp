@@ -11,40 +11,45 @@ class ExternalInventory(models.Model):
 
     name = fields.Char(string='Inventory Title', readonly=True)
     api_token = fields.Char(string='API Token', required=True)
-    oldest_item = fields.Date(string='The oldest item', readonly=True)
-    avg_likes = fields.Float(string='Average number of likes', readonly=True)
-    total_likes = fields.Integer(string='Total likes', readonly=True)
-    top_contributor = fields.Char(string='Top author', readonly=True)
+    description = fields.Text(string='Description', readonly=True)
+    category = fields.Char(string='Category', readonly=True)
+    creator = fields.Char(string='Created By', readonly=True)
+    is_public = fields.Boolean(string='Is Public', readonly=True)
+    tags = fields.Char(string='Tags', readonly=True)
+    total_items = fields.Integer(string='Total Items', readonly=True)
+    oldest_item = fields.Date(string='Oldest Item Date', readonly=True)
+    avg_likes = fields.Float(string='Avg Likes', readonly=True, digits=(12, 2))
+    total_likes = fields.Integer(string='Total Likes', readonly=True)
+    top_contributor = fields.Char(string='Top Author', readonly=True)
+    most_popular_item = fields.Char(string='Most Popular Item', readonly=True)
+    last_added_item = fields.Char(string='Last Added Item', readonly=True)
+    sync_date = fields.Datetime(string='Last Sync', readonly=True)
 
     def action_import_from_api(self):
         self.ensure_one()
-        base_url = "https://inventory-management-app-btfvdkc4ananaggy.canadacentral-01.azurewebsites.net"
-        url = f"{base_url}/api/external/aggregate/{self.api_token}"
+        url = f"https://inventory-management-app-btfvdkc4ananaggy.canadacentral-01.azurewebsites.net/api/external/aggregate/{self.api_token}"
         
         try:
             response = requests.get(url, timeout=20)
-            
             if response.status_code == 200:
                 data = response.json()
-                stats = data.get('stats', [])
-
-                dates_info = next((s for s in stats if s.get('title') == 'Creation Dates'), {})
-                likes_info = next((s for s in stats if s.get('title') == 'Engagement (Likes)'), {})
-                users_info = next((s for s in stats if s.get('title') == 'Top Contributors'), {})
-
-                top_users = users_info.get('topUsers', [])
-                first_user = top_users[0].get('user') if top_users else "No data"
-
                 self.write({
                     'name': data.get('title'),
-                    'oldest_item': dates_info.get('oldest'),
-                    'total_likes': likes_info.get('totalLikes', 0),
-                    'avg_likes': likes_info.get('avgLikesPerItem', 0),
-                    'top_contributor': first_user
+                    'description': data.get('description'),
+                    'category': data.get('categoryName'),
+                    'creator': data.get('creator'),
+                    'is_public': data.get('isPublic'),
+                    'tags': data.get('tags'),
+                    'total_items': data.get('totalItems'),
+                    'oldest_item': data.get('oldestDate'),
+                    'total_likes': data.get('totalLikes'),
+                    'avg_likes': data.get('avgLikes'),
+                    'top_contributor': data.get('topContributor'),
+                    'most_popular_item': data.get('mostPopularItem'),
+                    'last_added_item': data.get('lastAddedItem'),
+                    'sync_date': fields.Datetime.now(),
                 })
             else:
-                raise UserError(f"API returned an error: {response.status_code}")
-                
+                raise UserError(f"API Error: {response.status_code}")
         except Exception as e:
-            _logger.error(f"Azure Import Error: {str(e)}")
-            raise UserError(f"Communication error: {e}")
+            raise UserError(f"Connection failed: {e}")

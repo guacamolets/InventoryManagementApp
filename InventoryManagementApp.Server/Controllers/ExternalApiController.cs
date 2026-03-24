@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using InventoryManagementApp.Server.Entities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,46 +15,49 @@ public class ExternalApiController : ControllerBase
     [HttpGet("aggregate/{token}")]
     public async Task<IActionResult> GetAggregatedData(string token)
     {
-        var inventory = await _context.Inventories
-            .Include(i => i.Items)
-                .ThenInclude(item => item.Likes)
-            .Include(i => i.Items)
-                .ThenInclude(item => item.CreatedBy)
-            .FirstOrDefaultAsync(i => i.ApiToken == token);
-
-        if (inventory == null) return Unauthorized();
-
-        var results = new
+        try
         {
-            Title = inventory.Title,
-            TotalItems = inventory.Items.Count,
-            Stats = new List<object> {
-                new {
-                    Title = "Creation Dates",
-                    Type = "DateTime",
-                    Oldest = inventory.Items.Any() ? inventory.Items.Min(x => x.CreatedAt).ToString("yyyy-MM-dd") : null,
-                    Newest = inventory.Items.Any() ? inventory.Items.Max(x => x.CreatedAt).ToString("yyyy-MM-dd") : null
-                },
-                new {
-                    Title = "Engagement (Likes)",
-                    Type = "Number",
-                    TotalLikes = inventory.Items.Sum(x => x.Likes.Count),
-                    AvgLikesPerItem = inventory.Items.Any() ? inventory.Items.Average(x => x.Likes.Count) : 0,
-                    MaxLikesOnSingleItem = inventory.Items.Any() ? inventory.Items.Max(x => x.Likes.Count) : 0
-                },
-                new {
-                    Title = "Top Contributors",
-                    Type = "String",
-                    TopUsers = inventory.Items
-                        .GroupBy(x => x.CreatedBy.UserName)
-                        .OrderByDescending(g => g.Count())
-                        .Take(3)
-                        .Select(g => new { User = g.Key, ItemsCount = g.Count() })
-                        .ToList()
-                }
-            }
-        };
+            var inventory = await _context.Inventories
+                .Include(i => i.Owner)
+                .Include(i => i.Tags)
+                .Include(i => i.Items)
+                    .ThenInclude(item => item.Likes)
+                .Include(i => i.Items)
+                    .ThenInclude(item => item.CreatedBy)
+                .FirstOrDefaultAsync(i => i.ApiToken == token);
 
-        return Ok(results);
+            if (inventory == null) return Unauthorized();
+
+            var items = inventory.Items?.ToList() ?? new List<Item>();
+            var mostLikedItem = items.Any() ? items.OrderByDescending(x => x.Likes?.Count ?? 0).FirstOrDefault() : null;
+            var lastAddedItem = items.Any() ? items.OrderByDescending(x => x.CreatedAt).FirstOrDefault() : null;
+
+            var results = new
+            {
+                Title = inventory.Title ?? "Untitled",
+                Description = inventory.Description ?? "No description",
+                CategoryName = inventory.Category ?? "General",
+                Creator = inventory.Owner?.UserName ?? "System",
+                IsPublic = inventory.IsPublic,
+                TotalItems = items.Count,
+                Tags = string.Join(", ", inventory.Tags.Select(t => t.Name)),
+                MostPopularItem = mostLikedItem?.Name ?? "None",
+                LastAddedItem = lastAddedItem?.Name ?? "None",
+                AvgLikes = items.Any() ? items.Average(x => x.Likes?.Count ?? 0) : 0,
+                TotalLikes = items.Sum(x => x.Likes?.Count ?? 0),
+                OldestDate = items.Any() ? items.Min(x => x.CreatedAt).ToString("yyyy-MM-dd") : null,
+                TopContributor = items.Any()
+                    ? items.GroupBy(x => x.CreatedBy?.UserName ?? "Anonymous")
+                           .OrderByDescending(g => g.Count())
+                           .Select(g => g.Key).FirstOrDefault()
+                    : "N/A"
+            };
+
+            return Ok(results);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { error = ex.Message, detail = ex.InnerException?.Message });
+        }
     }
 }
