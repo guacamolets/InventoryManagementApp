@@ -6,6 +6,7 @@ import UserPage from "./pages/UserPage";
 import InventoryPage from "./pages/InventoryPage";
 import SearchPage from "./pages/SearchPage";
 import Navbar from "./components/Navbar";
+import SupportTicketModal from './components/integrations/SupportTicketModal';
 
 function App() {
   return (
@@ -18,7 +19,8 @@ function App() {
         <Route path="/profile" element={<UserPage />} />
         <Route path="/inventories/:id" element={<InventoryPage />} />
         <Route path="/search" element={<SearchPage />} />
-      </Routes>
+          </Routes>
+          <SupportTicketModal />
     </BrowserRouter>
   );
 }

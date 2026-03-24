@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const SalesforceSync = () => {
+const SalesforceModal = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({ companyName: '', firstName: '', lastName: '', email: '' });
@@ -55,4 +55,4 @@ const SalesforceSync = () => {
     );
 };
 
-export default SalesforceSync;
+export default SalesforceModal;

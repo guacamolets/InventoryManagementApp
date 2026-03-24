@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import api from "../api/api";
 import SortableTable from "../components/SortableTable";
-import SalesforceSync from "../components/SalesforceSync";
+import SalesforceModal from "../components/SalesforceModal";
 
 export default function UserPage() {
     const { t } = useTranslation();
@@ -88,7 +88,7 @@ export default function UserPage() {
             <SortableTable data={writable} isOwner={false} />
 
             {isSfModalOpen && (
-                <SalesforceSync onClose={() => setIsSfModalOpen(false)} />
+                <SalesforceModal onClose={() => setIsSfModalOpen(false)} />
             )}
         </div>
     );
